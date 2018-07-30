@@ -1,0 +1,9 @@
+*.sqlite
+app/cache.zip
+app/cache/*
+app/phpliteadmin.php
+my-review/*
+data/review/login.sqlite3
+data/*-evidence
+data/*-evidence.zip
+comments/*
