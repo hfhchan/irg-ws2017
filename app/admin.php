@@ -52,6 +52,11 @@ if (isset($_POST['action']) && $_POST['action'] === 'change_password') {
 
 
 if (isset($_POST['action']) && $_POST['action'] === 'register') {
+
+	if (!$session->isLoggedIn() || !$session->getUser()->isAdmin()) {
+		throw new Exception('Not logged in as admin!');
+	}
+
 	$username = $_POST['username'];
 	$pwd_hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
 	$name = $_POST['name'];
