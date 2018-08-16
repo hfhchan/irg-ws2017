@@ -3,7 +3,7 @@
 class CharacterCache {
 
 	const SHEETS = [
-		'IRGN2270WS2017v1.1',
+		'IRGN2270WS2017v2.0',
 		'IRGN2270Unified&Withdrawn',
 		'Sheet2'
 	];

@@ -268,7 +268,7 @@ Log::add('Fetch Char End');
 <meta charset=utf-8>
 <meta name=viewport content="width=initial-width,initial-scale=1">
 <title>
-<?
+<?php
 	if (isset($_GET['ids'])) {
 		echo 'IDS Lookup ' . htmlspecialchars($_GET['ids']);
 	} else if (isset($_GET['find'])) {
@@ -276,7 +276,7 @@ Log::add('Fetch Char End');
 	} else {
 		echo $data[0]->data[0] . ' | ' . $data[0]->data[Workbook::IDS];
 	}
-?> | WS2017v1.1</title>
+?> | WS2017v<?=Workbook::VERSION?></title>
 <style>
 [hidden]{display:none}
 body{font-family:Arial, "Microsoft Jhenghei",sans-serif;background:#eee;margin:0;-webkit-text-size-adjust:none;-moz-text-size-adjust: none;}
@@ -442,7 +442,7 @@ a.review_all{font-size:16px;border:1px solid #ccc;padding:4px 12px;display:block
 	</div>
 </div>
 
-<?
+<?php
 if (Env::$readonly) {
 	//define('EVIDENCE_PATH', 'https://raw.githubusercontent.com/hfhchan/irg-ws2017/5d22fba4/data');
 	define('EVIDENCE_PATH', '../data');
@@ -473,7 +473,7 @@ foreach ($data as $char) {
 
 	<h2 hidden>Character Info</h2>
 	<div class="ws2017_chart_table sheet-<?=$char->sheet?>">
-<?
+<?php
 	$char->renderPart1();
 	$char->renderPart2();
 	$char->renderPart3();
@@ -485,14 +485,14 @@ foreach ($data as $char) {
 
 	<div class=ws2017_content>
 		<section class=ws2017_left>
-<?
+<?php
 	$matched = $char->getMatchedCharacter();
 	if ($matched && substr($matched, 0, 1) !== '&') {
 		echo '<p style="background:red;font-size:24px;margin:10px 0;padding:10px;color:#fff">Exact Match: <a href="/unicode/fonts/gen-m.php?name=' . ($matched) . '" target=_blank style="color:#fff">' . $matched . ' (' . charToCodepoint($matched) . ')</a></p>';
 	}
 ?>
 
-<?
+<?php
 	$codepoints = [];
 	preg_replace_callback('@U\+0?([0-9A-Fa-f]{4,5})@', function($m) use (&$codepoints) {
 		$codepoint = 'U+' . $m[1];
@@ -677,18 +677,18 @@ foreach ($data as $char) {
 
 <?php if (!empty($rowData[Workbook::UTC_EVIDENCE])) { ?>
 <div style="background:#eee;padding:5px"><?=$rowData[52]; ?></div>
-<?
+<?php
 	$files = glob('../data/utc-evidence/' . $rowData[Workbook::UTC_SOURCE] . '*');
 	foreach ($files as $file) {
 		$filename = basename($file);
 		if (substr($filename, -4) === '.pdf') {
 ?>
 	<iframe src="<?=EVIDENCE_PATH?>/utc-evidence/<?=html_safe($filename)?>" width=800 height=1200 class=full></iframe>
-<?
+<?php
 		} else {
 ?>
 	<a href="<?=EVIDENCE_PATH?>/utc-evidence/<?=html_safe($filename)?>" target=_blank><img src="<?=EVIDENCE_PATH?>/utc-evidence/<?=html_safe($filename)?>" width=800 class=full style="max-height:1200px;object-fit:scale-down;object-position:top"></a>
-<?
+<?php
 		}
 	}
 	
@@ -699,16 +699,16 @@ foreach ($data as $char) {
 <? if (!env::$readonly) { ?>
 	<div style="display:grid;grid-template-columns:auto auto">
 		<h2>Review</h2>
-<?
+<?php
 if (!$char->hasReviewedUnification() || !$char->hasReviewedAttributes()) {
 ?>
 		<div><a href="<?=html_safe($char->base_path . '&mark=3')?>" class=review_all>Review All</a></div>
-<?
+<?php
 }
 ?>
 	</div>
 <? } ?>
-<?
+<?php
 /*
 $review_path = ['IRGN2179_UTC-Review', 'IRGN2179_KR-Review', 'IRGN2155_UK_Review', 'IRGN2155_China_Review'];
 foreach ($review_path as $path) {
@@ -728,23 +728,23 @@ foreach ($review_path as $path) {
 }
 */
 ?>
-<?
+<?php
 	if (!env::$readonly) { 
 ?>
 	<div>
 		<b>Evidence &amp; Unification</b>:<br>
-<?
+<?php
 		if ($char->hasReviewedUnification()) {
 			echo '<div>Reviewed.</div>';
 		} else {
 ?>
 		<a href="<?=html_safe($char->base_path . '&mark=1')?>" class=review>Review</a>
-<?
+<?php
 		}
 ?>
 	</div>
 	<hr>
-<?
+<?php
 	}
 ?>
 	<div>
@@ -890,7 +890,7 @@ foreach ($results as $part) {
 		<th>TC</th>
 	</tr>
 </thead>
-<?
+<?php
 
 $calculateTotalStrokeAndFirstStroke = function($sequence) use (&$calculateTotalStrokeAndFirstStroke) {
 	$total_strokes = 0;
@@ -1043,7 +1043,7 @@ if (!env::$readonly) {
 	} else {
 ?>
 		<a href="<?=html_safe($char->base_path . '&mark=2')?>" class=review>Review</a>
-<?
+<?php
 	}
 }
 ?>
@@ -1084,7 +1084,7 @@ Log::add('Comments End');
 <hr>
 <section class=ws2017_comments>
 	<h2>Comments</h2>
-<?
+<?php
 		if (!empty($rowData[25])) {
 			if ('Deleted' !== ($rowData[25])) {
 				echo '<div style="margin:10px 0;color:red;background:yellow;padding:10px"><b>'.($rowData[25]).'</b></div>';
@@ -1216,7 +1216,7 @@ if (!env::$readonly && $session->isLoggedIn()) { ?>
 		<div style="font-size:16px">Submitting as: <?=html_safe($session->getUser()->getName());?></div>
 		<div>
 			<select name=type class=comment_type>
-<?
+<?php
 		foreach (DBComments::COMMENT_TYPES as $type) {
 			echo '<option value="' . $type . '">' . $type . '</option>'."\r\n";
 		}
@@ -1227,7 +1227,7 @@ if (!env::$readonly && $session->isLoggedIn()) { ?>
 			<textarea name=comment class=comment_content data-sq-number="<?=$sq_number?>"></textarea>
 		</div>
 		<div class=comment_keywords>
-<?
+<?php
 		foreach (DBComments::getAllKeywords($session->getUser()->getUserId()) as $keyword) {
 			echo '<span>' . $keyword . '</span>';
 		}
@@ -1267,14 +1267,14 @@ if (!env::$readonly && $session->isLoggedIn()) { ?>
 		});
 	})();
 	</script>
-<?
+<?php
 }
 ?>
 </section>
 <hr>
 <section class=ws2017_actions>
 	<h2>Discussion Record</h2>
-<?
+<?php
 		echo '<table>';
 		echo '<col width=200>';
 		echo '<col width=auto>';
@@ -1396,7 +1396,7 @@ if (!env::$readonly && $session->isLoggedIn() && $session->getUser()->isAdmin())
 		<div>IRG Meeting #50 <input type=hidden name=session value="50"></div>
 		<div>
 			<select name=type class=action_type>
-<?
+<?php
 		foreach (DBActions::ACTION_TYPES as $type) {
 			echo '<option value="' . $type . '">' . $type . '</option>'."\r\n";
 		}
@@ -1410,7 +1410,7 @@ if (!env::$readonly && $session->isLoggedIn() && $session->getUser()->isAdmin())
 			<input type=submit value="Add Discussion Record" class=action_submit>
 		</div>
 	</form>
-<?
+<?php
 }
 ?>
 </section>
@@ -1428,7 +1428,7 @@ if (!env::$readonly && $session->isLoggedIn() && $session->getUser()->isAdmin())
 ?>
 	</details>
 </div>
-<?
+<?php
 }
 ?>
 

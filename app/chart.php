@@ -17,7 +17,7 @@ Log::add('Fetch Char End');
 <!doctype html>
 <meta charset=utf-8>
 <meta name=viewport content="width=initial-width,initial-scale=1">
-<title>WS2017v1.1</title>
+<title>Charts | WS2017v<?=Workbook::VERSION?></title>
 <style>
 [hidden]{display:none}
 body{font-family:Arial,"HKCS","Microsoft Yahei",sans-serif;background:#eee;margin:0;-webkit-text-size-adjust:none;-moz-text-size-adjust: none;}
@@ -73,7 +73,7 @@ form{margin:0}
 <script src="jquery.js"></script>
 <body>
 
-<?
+<?php
 if (Env::$readonly) {
 	//define('EVIDENCE_PATH', 'https://raw.githubusercontent.com/hfhchan/irg-ws2017/5d22fba4/data');
 	define('EVIDENCE_PATH', '../data');
@@ -81,7 +81,7 @@ if (Env::$readonly) {
 	define('EVIDENCE_PATH', '../data');
 }
 ?>
-<?
+<?php
 
 usort($chars, function($a, $b) {
 	$c = $a->getRadicalStrokeFull();
@@ -181,17 +181,17 @@ $pages = array_slice($pages, $start, 50);
 	<br>
 	<br>
 	Show:
-<?
+<?php
 for ($i = 1; $i <= 214; $i += 1) {
 ?>
 	<a href="chart.php?radical=<?=$i?>"><?=getIdeographForRadical($i)[0]?></a>
-<?
+<?php
 }
 ?>
 	<br>
 	<br>
 	Show: 
-<?
+<?php
 for ($i = 0; $i < $total_pages; $i += 50) {
 ?>
 <? if ($start == $i) {?>
@@ -199,13 +199,13 @@ for ($i = 0; $i < $total_pages; $i += 50) {
 <? } else {?>
 	<a href="?range=<?=$i?>">Pages <?=$i+1?> to <?=$i+50?></a>
 <? }?>
-<?
+<?php
 }
 ?>
 </div>
 
 
-<?
+<?php
 
 foreach ($pages as $page) {
 
@@ -244,7 +244,7 @@ foreach ($pages as $page) {
 						<td>Discussion Record</td>
 					</tr>
 				</thead>
-<?
+<?php
 		for ($i = 0; $i < 8; $i++) {
 			if (!isset($page->chars[$i])) {
 ?>
@@ -260,7 +260,7 @@ foreach ($pages as $page) {
 					<td></td>
 					<td></td>
 				</tr>
-<?
+<?php
 				continue;
 			}
 			$char = $page->chars[$i];
@@ -278,7 +278,7 @@ foreach ($pages as $page) {
 					<td>
 						<div class=ws2017_chart_attributes style="display:grid;grid-template-rows:1fr 1fr 1fr">
 							<div style="display:grid;align-items:center"><?=$char->getRadicalStroke()?></div>
-							<div style="display:grid;align-items:center;white-space:nowrap"><div><?
+							<div style="display:grid;align-items:center;white-space:nowrap"><div><?php
 									$ids = parseStringIntoCodepointArray($rowData[Workbook::IDS]);
 									foreach ($ids as $component) {
 										if (!empty(trim($component))) {
@@ -350,7 +350,7 @@ foreach ($pages as $page) {
 						</div>
 					</td>
 				</tr>
-<?
+<?php
 		}
 ?>
 			</table>
@@ -364,6 +364,6 @@ foreach ($pages as $page) {
 		</table>
 	</div>
 </div>
-<?
+<?php
 }
 ?>

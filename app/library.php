@@ -70,7 +70,7 @@ function parseStringIntoCodepointArray($utf8) {
 					$j++;
 				}
 				$result[] = substr($utf8, $i, $j - $i);
-				$i = $j;
+				$i = $j - 1;
 			} else {
 				$result[] = $char;
 			}

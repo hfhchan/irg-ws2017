@@ -3,6 +3,9 @@ require_once 'user_chk.php';
 
 
 if (isset($_POST['action']) && $_POST['action'] === 'login') {
+	if ($session->isLoggedIn()) {
+		throw new Exception('Already Logged In!');
+	}
 	$q = $user_db->prepare('SELECT "password" FROM users WHERE username=?');
 	$q->execute([ $_POST['username'] ]);
 	$password = $q->fetchColumn();
@@ -29,9 +32,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'login') {
 }
 
 if (isset($_POST['action']) && $_POST['action'] === 'logout') {
-	$q = $user_db->prepare('UPDATE session SET "expires" = DATETIME(\'NOW\') WHERE "session_id" = ?');
-	$q->execute([ $session_id ]); // 3 hours
-	setcookie('IRG_SESSION', 'null', 0, null, null, true, true);
+	if ($session->isLoggedIn()) {
+		$q = $user_db->prepare('UPDATE session SET "expires" = DATETIME(\'NOW\') WHERE "session_id" = ?');
+		$q->execute([ $_COOKIE['IRG_SESSION'] ]); // 3 hours
+		setcookie('IRG_SESSION', 'null', 0, null, null, true, true);
+		header('Location: index.php');
+		exit;
+	}
 }
 
 if (isset($_POST['action']) && $_POST['action'] === 'change_password') {

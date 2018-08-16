@@ -1,4 +1,6 @@
-<?
+<?php
+exit;
+
 
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';
@@ -6,7 +8,7 @@ require_once 'library.php';
 require_once 'router.php';
 ?>
 <title>Import</title>
-<?
+<?php
 $sources_cache   = new SourcesCache();
 
 $rows = '00059	IDS Check: Unify to WS2017-00058 (strong similarity)

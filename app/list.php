@@ -77,7 +77,7 @@ form{margin:0}
 	<? } ?>
 		Date: Generated on <?=date("Y-m-d")?>
 	</p>
-<?
+<?php
 
 if ($user) {
 	$list = DBComments::getList($user->getUserId());

@@ -356,7 +356,7 @@ class WSCharacter {
 		if (file_exists($filename)) {
 ?>
 <div class="<?=htmlspecialchars($class)?>"><img src="<?=html_safe($filename)?>"></div>
-<?
+<?php
 			return;
 		}
 		$suffix = rand(10000,99999);
@@ -468,7 +468,7 @@ window.delay = window.delay || 0;
 	}, delay);
 })(window.delay);
 </script>
-<?
+<?php
 		Log::add('Render Char Cutting End ' . $this->data[0]);
 	}
 
@@ -492,7 +492,7 @@ window.delay = window.delay || 0;
 			<div><?=$this->getRadicalStroke()?></div>
 			<div>
 				<div>
-<?
+<?php
 		$ids = parseStringIntoCodepointArray($this->data[Workbook::IDS]);
 		foreach ($ids as $component) {
 			if (!empty(trim($component))) {
@@ -518,7 +518,7 @@ window.delay = window.delay || 0;
 				<div class=ws2017_chart_attributes_strokes_ts><?=$this->getTotalStrokes()?></div>
 			</div>
 		</div>
-<?
+<?php
 	}
 
 	public function renderPart2() {
@@ -568,7 +568,7 @@ window.delay = window.delay || 0;
 			</td>
 			</tr>
 		</table>
-<?
+<?php
 	}
 
 	public function renderPart3() {
@@ -577,13 +577,13 @@ window.delay = window.delay || 0;
 			<div>
 				<? if ($this->sheet) echo '<b>'.CharacterCache::SHEETS[$this->sheet] . '</b><br>'; ?>
 				<?=$this->data[Workbook::DISCUSSION_RECORD]?>
-<?
+<?php
 		if ((isset($this->data[Workbook::K_SOURCE])) && file_exists('../data/k-bitmap/' . substr($this->data[Workbook::K_SOURCE+1], 0, -4) . '-updated.png')) {
 			echo '<br>Glyph Updated: <img src="' . EVIDENCE_PATH . '/k-bitmap/' . substr($this->data[Workbook::K_SOURCE+1], 0, -4) . '-updated.png" width="32" height="32">';
 		}
 ?>
 			</div>
 		</div>
-<?
+<?php
 	}
 }

@@ -62,7 +62,7 @@ form{margin:0}
 	<col width=280>
 	<col width=160>
 	<col width=420>
-<?
+<?php
 
 $override = [
 	'03345' => 'unified by U+2E28C (JMJ-058343), irg46.',

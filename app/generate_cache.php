@@ -16,7 +16,7 @@ $character_cache = new CharacterCache();
 $ids_cache = new IDSCache();
 ?>
 <script src="jquery.js"></script>
-<?
+<?php
 
 $sq_number = '00000';
 
