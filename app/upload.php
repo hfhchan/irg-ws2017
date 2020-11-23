@@ -6,6 +6,8 @@ require_once 'user_chk.php';
 
 Log::disable();
 
+header('Cache-Control: private, no-cache, no-store');
+
 if (!$session->isLoggedIn()) {
 	echo 'Not Logged In!';
 	exit;

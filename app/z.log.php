@@ -36,6 +36,9 @@ class Log {
 }
 Log::start();
 register_shutdown_function(function() {
+	if (empty($_COOKIE['debug'])) {
+		return;
+	}
 	if (Log::$disabled || Env::$readonly) {
 		return;
 	}
@@ -43,9 +46,34 @@ register_shutdown_function(function() {
 	Log::end();
 });
 
+class FatalException extends Exception{
+	public function allowLogin($allowLogin = null) {
+		$this->allowLogin = $allowLogin;
+	}
+	public function title($title = null) {
+		$this->title = $title;
+	}
+}
+
 set_exception_handler(function (Throwable $e){
-	echo '<div class=center-wrap>';
-	echo '<p><b>Uncaught Exception</b><br>';
+	echo '<!doctype html><meta charset=utf-8><meta name=viewport content="width=initial-width,initial-scale=1"><link href="common.css" rel=stylesheet type="text/css"><link href="style.css" rel=stylesheet type="text/css"><script src="jquery.js"></script>';
+	
+	if ($e instanceOf FatalException) {
+		if (!empty($e->allowLogin)) {
+			require_once 'index.searchbar.php';
+		}
+		if (!empty($e->title)) {
+			echo '<title>' . htmlspecialchars($e->title) . '</title>';
+		}
+		echo '<div class=center_box>';
+		echo htmlspecialchars($e->getMessage());
+		echo '</div>';
+		exit;
+	}
+
+	require_once 'index.searchbar.php';
+	echo '<div class=center_box>';
+	echo '<p><b>Error</b><br>';
 	echo htmlspecialchars($e->getMessage()).'<br>';
 	echo '<span style="color:#333;font:13px monospace">@ &nbsp;' . htmlspecialchars($e->getFile()) . '('.$e->getLine().')</span>';
 	echo '</p>';
@@ -56,3 +84,14 @@ set_exception_handler(function (Throwable $e){
 	echo '</div>';
 	exit;
 });
+
+function output_error_message($title, $message) {
+	echo '<!doctype html><meta charset=utf-8><meta name=viewport content="width=initial-width,initial-scale=1"><link href="style.css" rel=stylesheet type="text/css"><script src="jquery.js"></script>';
+	require_once 'index.searchbar.php';
+	echo '<div class=center_box>';
+	echo '<p><b>' . htmlspecialchars($title) . '</b><br>';
+	echo htmlspecialchars($message);
+	echo '</p>';
+	echo '</div>';
+	exit;	
+}

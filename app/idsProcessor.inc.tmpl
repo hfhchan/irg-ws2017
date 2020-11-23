@@ -1,0 +1,134 @@
+<style>
+.ids_attribute_div{width:100%;margin:10px 0;border-width:0 0 1px;border-style:solid;border-color:#999}
+.ids_attribute_div .thead{font-size:13px}
+.ids_attribute_div .tr{border-width:1px 0 0;border-style:solid;border-color:#999}
+.ids_attribute_div .tr{display:grid;grid-template-columns: 140px 1fr 1fr 1fr}
+.ids_attribute_div .th{text-align:left;font-weight:bold}
+.ids_attribute_div .th,.ids_attribute_div .td{padding:2px 4px}
+
+.ids_check_div{width:100%;margin:10px 0;border-width:0 0 1px;border-style:solid;border-color:#999}
+.ids_check_div .thead{font-size:13px}
+.ids_check_div .tr{border-width:1px 0 0;border-style:solid;border-color:#999}
+.ids_check_div .tr{display:grid;grid-template-columns: 40px 80px 80px 1fr}
+.ids_check_div .th{text-align:left;font-weight:bold}
+.ids_check_div .th,.ids_check_div .td{padding:2px 4px}
+</style>
+
+<script type="text/x-template" id="ids-result">
+<div>
+	<div class=ids_attribute_div>
+		<div class=thead>
+			<div class=tr>
+				<div class=th>Char</div>
+				<div class=th>SC</div>
+				<div class=th>FS</div>
+				<div class=th>TC</div>
+			</div>
+		</div>
+		<template v-for="part in result">
+			<ids-result-row :is-admin="isAdmin" :part="part" :depth="0" />
+		</template>
+	</div>
+	<br>
+	<div class=ids_check_div>
+		<div class=thead>
+			<div class=tr>
+				<div class=td></div>
+				<div class=th align=right title="Determined Algorithmically, may not cover some cases">Expected</div>
+				<div class=th align=right>Recorded</div>
+				<div class=td></div>
+			</div>
+		</div>
+		<div class=tr v-if="!radicalFound">
+			<div class=th>SC</div>
+			<div class=td align=right>/</div>
+			<div class=td align=right>{{ strokeCountData }}</div>
+			<div class=td>Radical not found</div>
+		</div>
+		<div class=tr v-else>
+			<div class=th>SC</div>
+			<div class=td align=right>{{ strokeCount }}</div>
+			<div class=td align=right>{{ strokeCountData }}</div>
+			<div class=td align=right>
+				<span style="color:red" title="Determined Algorithmically, may not cover some cases" v-if="strokeCount != strokeCountData">Mismatch</span>
+				<span style="color:green" v-else>OK</span>
+			</div>
+		</div>
+		<div class=tr v-if="!radicalFound">
+			<div class=th>FS</div>
+			<div class=td align=right>/</div>
+			<div class=td align=right>{{ firstStrokeData }}</div>
+			<div class=td>Radical not found</div>
+		</div>
+		<div class=tr v-else>
+			<div class=th>FS</div>
+			<div class=td align=right>{{ firstStroke }}</div>
+			<div class=td align=right>{{ firstStrokeData }}</div>
+			<div class=td align=right>
+				<span style="color:red" title="Determined Algorithmically, may not cover some cases" v-if="firstStroke != firstStrokeData">Mismatch</span>
+				<span style="color:green" v-else>OK</span>
+			</div>
+		</div>
+		<div class=tr>
+			<div class=th>TC</div>
+			<div class=td align=right>{{ totalCount }}</div>
+			<div class=td align=right>{{ totalCountData }}</div>
+			<div class=td align=right>
+				<span style="color:red" title="Determined Algorithmically, may not cover some cases" v-if="totalCount != totalCountData">Mismatch</span>
+				<span style="color:green" v-else>OK</span>
+			</div>
+		</div>
+	</div>
+	<p><small>Note: expected counts are determined algorithmically from the given IDS and may be inaccurate in edge cases.</small></p>
+</div>
+</script>
+
+<script type="text/x-template" id="ids-result-row">
+	<div>
+		<div class=tr>
+			<div class=th style="font-family:Consolas,Microsoft Jhenghei">{{ prefix }}{{ part.identifier }}</div>
+
+			<div class=td align=right title=Radical v-if="part.isRadical">N/A</div>
+			<div class=td align=right v-else-if="!part.strokeCount"><span style="color:red">?</span></div>
+			<div class=td align=right v-else>{{ part.strokeCount }}</div>
+
+			<div class=td align=right title=Radical v-if="part.isRadical">N/A</div>
+			<div class=td align=right v-else-if="!part.firstStroke"><span style="color:red">?</span></div>
+			<div class=td align=right v-else>{{ part.firstStroke }}</div>
+
+			<div class=td align=right v-if="!part.strokeCount"><span style="color:red">?</span></div>
+			<div class=td align=right v-else>{{ part.strokeCount }}</div>
+		</div>
+
+		<template v-if="'children' in part">
+			<template v-for="sequence in part.children">
+				<ids-result-row
+					v-for="component in sequence.charList"
+					:is-admin="isAdmin"
+					:part="component" 
+					:depth="depth + 1" />
+				<div class=tr style="color:#00c">
+					<div class=th>
+						{{prefix}}Total
+						<template v-if="isAdmin">
+							(<a :href="sequence.link" class=add_stroke_link>Confirm</a>)
+						</template>
+					</div>
+					<div class=td align=right>{{ sequence.ts }}</div>
+					<div class=td align=right>{{ sequence.fs }}</div>
+				</div>
+			</template>
+			<template v-if="!part.children.length && isAdmin">
+				<div class=tr style="color:#00c">
+					<div class=th>{{prefix}}Add</div>
+					<div class=td align=right colspan=3>
+						<form method=get action="." style="display:flex">
+							<input name=add_strokes :value="part.codepoint + ' 0|0'" style="border:1px solid #ccc;background:none;padding:2px 4px;min-width:0;flex:auto" data-lpignore="true">
+							<input type=submit value=Save style="border:1px solid #999;background:#eee;margin:0;margin-left:2px;padding:2px 8px">
+						</form>
+					</div>
+				</div>
+			</template>
+		</template>
+	</div>
+</script>

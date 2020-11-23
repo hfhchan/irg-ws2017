@@ -2,7 +2,7 @@
 
 class Workbook {
 
-	const VERSION = '2.0'; // WS2017 version
+	const VERSION = '5.1'; // WS2017 version
 	
 	// Indexes
 	const DISCUSSION_RECORD = 1;
@@ -54,7 +54,7 @@ class Workbook {
 		Log::add('Load File Start');
 		$objReader = PHPExcel_IOFactory::createReader('Excel2007');
 		$objReader->setReadDataOnly(true);
-		$workbook = $objReader->load("../data/IRGN2309WS2017v2.0Attributes2018-07-09.xlsx");
+		$workbook = $objReader->load("../data/IRGN2347WS2017v3.0Attributes2018-11-23.xlsx");
 		Log::add('Load File End');
 		return $workbook;
 	}

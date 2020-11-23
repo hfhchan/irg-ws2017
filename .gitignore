@@ -8,3 +8,4 @@ data/*-evidence
 data/*-evidence.zip
 comments/*
 comments.zip
+data/review/session.sqlite3

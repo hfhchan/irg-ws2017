@@ -4,14 +4,24 @@ class SourcesCache {
 
 	private $sources = array();
 
-	private function load() {
+	private function load($version = '4.0') {
 		if (empty($this->sources)) {
-			$this->sources = json_decode(file_get_contents('../data/attributes-cache/sources.json'), true);
+			if ($version === '2.0') {
+				$this->sources = json_decode(file_get_contents('../data/attributes-cache-v2/sources.json'), true);
+			} else {
+				$this->sources = json_decode(file_get_contents('../data/attributes-cache/sources.json'), true);
+			}
 		}
 	}
 
-	public function getKeys() {
+	public function getKeys($version = '4.0') {
+		$this->load($version);
 		return array_keys($this->sources);
+	}
+
+	public function getSources($version = '4.0') {
+		$this->load($version);
+		return $this->sources;
 	}
 
 	public function getAll() {
@@ -109,5 +119,70 @@ class SourcesCache {
 		}
 		Log::add('Loop Data End');
 		return null;
+	}
+	
+	public function getGroupBySourceRef($version) {		
+		if (!CharacterCache::hasVersion($version)) {
+			throw new Exception('Invalid $version');
+		}
+
+		$character_cache = new CharacterCache();
+
+		$prefixReplacements = [
+			'GDM' => 'China (GDM/GXM - 公安部治安管理局)',
+			'GXM' => 'China (GDM/GXM - 公安部治安管理局)',
+			'GHC' => 'China (GHC - 汉语大词典（第一版）)',
+			'GKJ' => 'China (GKJ - 《中医字典》)',
+			'GZ' => 'China (Zhuang Characters)',
+			'GZA' => 'China (Zhuang Characters)',
+			'GPGLG' => 'China (Zhuang Characters)',
+			'GLGYJ' => 'China (Zhuang Characters)',
+			'KC' => 'ROK',
+			'T12' => 'TCA (《化學命名原則（第四版）》 Chemical Nomenclature: 4th Edition)',
+			'T13' => 'TCA (MOE Dictionary)',
+			'TB' => 'TCA (MOE Dictionary)',
+			'TC' => 'TCA (MOE Dictionary)',
+			'TD' => 'TCA (MOE Dictionary)',
+			'TE' => 'TCA (MOE Dictionary)',
+			'USAT' => 'SAT',
+			'V' => 'Vietnam',
+		];
+		$groups = [];
+
+		$keys = $this->getKeys($version);
+		foreach ($keys as $key) {
+			if ($key[0] === 'U' && $key[1] === 'S') {
+				$prefix = 'USAT';
+			}
+			if (strpos($key, '-')) {
+				list($prefix, $junk) = explode('-', $key);
+			}
+			if (isset($prefixReplacements[$prefix])) {
+				$prefix = $prefixReplacements[$prefix];
+			}
+			if ($key === 'TB-6231') {
+				$prefix = 'TCA (《化學命名原則（第四版）》 Chemical Nomenclature: 4th Edition)';
+			}
+			if ($key === 'TB-6B25') {
+				$prefix = 'TCA (《化學命名原則（第四版）》 Chemical Nomenclature: 4th Edition)';
+			}
+			if ($key === 'TB-7D55') {
+				$prefix = 'TCA (《化學命名原則（第四版）》 Chemical Nomenclature: 4th Edition)';
+			}
+			if ($key === 'TC-4162') {
+				$prefix = 'TCA (《化學命名原則（第四版）》 Chemical Nomenclature: 4th Edition)';
+			}
+			if ($key === 'TC-6635') {
+				$prefix = 'TCA (《化學命名原則（第四版）》 Chemical Nomenclature: 4th Edition)';
+			}
+			if (!isset($groups[$prefix])) {
+				$groups[$prefix] = [];
+			}
+			$groups[$prefix][] = $key;
+		}
+		
+		ksort($groups);
+		
+		return $groups;
 	}
 }

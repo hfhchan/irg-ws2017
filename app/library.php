@@ -1,5 +1,10 @@
 <?php
 
+if (!isset($_COOKIE['debug']) && time() < 1584792000) {
+	echo 'Under maintenace till 2020-03-21 20:00 (UTC+0800)';
+	exit;
+}
+
 Log::add('DB Start');
 
 $db = new PDO('sqlite:../data/review/current-database.sqlite3');
@@ -19,14 +24,30 @@ class Env {
 
 Log::add('DB End');
 
+require_once 'v-source-fixup.php';
+
 require_once 'Workbook.php';
+require_once 'StatusCache.php';
 require_once 'SourcesCache.php';
 require_once 'CharacterCache.php';
 require_once 'IDSCache.php';
 require_once 'WSCharacter.php';
+
 require_once 'DBProcessedInstance.php';
 require_once 'DBComments.php';
-require_once 'DBActions.php';
+require_once 'DBMeeting.php';
+require_once 'DBVersions.php';
+require_once 'DBDiscussionRecord.php';
+require_once 'DBChanges.php';
+require_once 'DBCharacters.php';
+require_once 'DBCharacterEvidence.php';
+require_once 'DBCharacterGlyph.php';
+
+require_once 'CommentProcessor.php';
+require_once 'IDSProcessor.php';
+
+DBMeeting::init();
+DBVersions::init();
 
 function loadWorkbook() {
 	return Workbook::loadWorkbook();
@@ -362,7 +383,7 @@ function getTotalStrokes($codepoint) {
 	$totalstrokes = 0;
 	$fs = 0;
 	foreach (file('../totalstrokes.txt') as $totalstrokesline) {
-		if (strpos($totalstrokesline, $codepoint) !== false) {
+		if (strpos($totalstrokesline, $codepoint . ' ') !== false) {
 			$line = trim(substr($totalstrokesline, strlen($codepoint)));
 			@list($totalstrokes, $fs) = explode('|', $line);
 		}
@@ -383,3 +404,10 @@ function codepointIsIDC($codepoint) {
 require_once '../../../IDS/library.php';
 
 
+function getImageHTML($codepoint) {
+	if ($codepoint[2] === 'F' || ($codepoint[2] === '2' && $codepoint[3] === 'F')) {
+		return '<img src="../../../Code Charts/UCSv9/Compat/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
+	} else {
+		return '<img src="../../../Code Charts/UCSv9/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
+	}
+}

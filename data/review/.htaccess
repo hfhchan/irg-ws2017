@@ -1,1 +1,4 @@
 Require all denied
+<Files current-database.sqlite3>
+	Require all granted
+</Files>

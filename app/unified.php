@@ -1,24 +1,9 @@
 <?php
 
-if (isset($_GET['null'])) {
-	header('HTTP/1.1 204 No Content');
-	return '';
-}
-
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';
 require_once 'library.php';
-
-if (!env::$readonly) {
-	if (isset($_POST['store'])) {
-		if (!preg_match('@^[a-z0-9-_.]+$@', $_POST['store'])) {
-			throw new Exception('Invalid filename');
-		}
-		$data = substr($_POST['data'], strlen('data:image/png;base64,'));
-		$data = base64_decode($data);
-		file_put_contents('cache/' . $_POST['store'], $data);
-	}
-}
+require_once 'user_chk.php';
 
 $sources_cache = new SourcesCache();
 $character_cache = new CharacterCache();
@@ -28,7 +13,8 @@ $ids_cache = new IDSCache();
 <!doctype html>
 <meta charset=utf-8>
 <meta name=viewport content="width=initial-width,initial-scale=1">
-<title>Unified | WS2015v4.0</title>
+<title>Unified | WS2017v<?=Workbook::VERSION?></title>
+<link href="common.css" rel=stylesheet type="text/css">
 <style>
 [hidden]{display:none}
 body{font-family:Arial, "Microsoft Jhenghei",sans-serif;margin:0;-webkit-text-size-adjust:none;-moz-text-size-adjust: none;}
@@ -52,6 +38,9 @@ form{margin:0}
 .comment_block{font-size:24px}
 .comment_block select {font-size:20px;display:block;border:1px solid #999;padding:4px;margin:10px 0;font-family:inherit}
 .comment_block textarea{display:block;width:-webkit-fill-available;width:-moz-available;min-height:200px;border:1px solid #999;padding:4px;font-family:inherit}
+
+.sheet-1{background:#ccc}
+.sheet-2{background:#ff0}
 </style>
 <script src="jquery.js"></script>
 <body>
@@ -65,55 +54,49 @@ form{margin:0}
 <?php
 
 $override = [
-	'03345' => 'unified by U+2E28C (JMJ-058343), irg46.',
-	'02218' => 'unified to U+24261, irg47.',
-	'03863' => 'U+279FF, add to ivd, irg48.',
-	'03531' => 'postponed for IVS research, irg47. unified by U+2E39B (JMJ-058438), irg46.',
 	
 ];
 
 $list = $sources_cache->getAll();
 foreach ($list as $source) {
-	$char = $character_cache->get($source);
-	if ($char->sheet !== 1) {
+	$char = DBCharacters::getCharacter($source);
+	if ($char->status !== 1) {
 		continue;
 	}
-	if (strpos(strtolower($char->data[1]), 'withdraw') !== false) {
+	if (strpos(strtolower($char->discussion_record), 'withdraw') !== false) {
 		continue;
 	}
 
-	$record = $char->data[1];
-	if (isset($override[$char->data[0]])) {
-		$record = $override[$char->data[0]];
+	$record = $char->discussion_record;
+	if (isset($override[$char->sn])) {
+		$record = $override[$char->sn];
 	}
 	$unify = preg_match_all('@(^|[^0-9-])((U\\+[0-9A-F]{4,5})|([0-9]{5}))[^0-9]@', strtoupper($record), $matches);
 
 	echo '<tr>';
-	echo '<td>' . $char->data[0] . '</td>';
+	echo '<td>' . $char->sn . '</td>';
 	echo '<td>';
-	echo '<a href="./?id=' . $char->data[0] . '" target=_blank>';
-	$char->renderCodeChartCutting();
+	echo '<a href="./?id=' . $char->sn . '" target=_blank>';
+	$char->renderPart4();
 	echo '</a>';
 	echo '</td>';
 	echo '<td>';
 	echo htmlspecialchars($record);
 	echo '</td>';
 	echo '<td>';
-	echo '<pre>';
 	foreach ($matches[2] as $match) {
-		if (ctype_digit($match)) {
-			$char = $character_cache->get($match);
-			$char->renderCodeChartCutting();
-		} else {
-			$codepoint = 'U+' . ltrim(substr($match, 2), '0');
-			if ($codepoint[2] === '2' && $codepoint[3] === 'F') {
-				echo '<img src="../../../Code Charts/UCSv9/Compat/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
+		try {
+			if (ctype_digit($match)) {
+				$char = DBCharacters::getCharacter($match);
+				$char->renderPart4();
 			} else {
-				echo '<img src="../../../Code Charts/UCSv9/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
+				$codepoint = 'U+' . ltrim(substr($match, 2), '0');
+				echo getImageHTML($codepoint);
 			}
+		} catch (Exception $e) {
+			echo $e->getMessage();
 		}
 	}
-	echo '</pre>';
 	echo '</td>';
 	echo '</tr>';
 }

@@ -8,19 +8,26 @@ require_once 'user_chk.php';
 
 Log::disable();
 
+if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
+	$version = $_GET['version'];
+} else {
+	$version = Workbook::VERSION;
+}
+
 Log::add('Fetch Char');
 $character_cache = new CharacterCache();
-$chars = $character_cache->getAll();
+$chars = $character_cache->getAll($version);
 Log::add('Fetch Char End');
 
 ?>
 <!doctype html>
 <meta charset=utf-8>
-<meta name=viewport content="width=initial-width,initial-scale=1">
-<title>Charts | WS2017v<?=Workbook::VERSION?></title>
+<meta name=viewport content="width=1200">
+<title>Charts | WS2017v<?=$version?></title>
+<link href="common.css" rel=stylesheet type="text/css">
 <style>
 [hidden]{display:none}
-body{font-family:Arial,"HKCS","Microsoft Yahei",sans-serif;background:#eee;margin:0;-webkit-text-size-adjust:none;-moz-text-size-adjust: none;}
+body{font-family:Arial,IPAMjMincho,"TH-Tshyn-P2","Microsoft Jhenghei","HanaMinA","HanaMinB","HanaMinC","Microsoft Yahei",sans-serif;background:#eee;margin:0;-webkit-text-size-adjust:none;-moz-text-size-adjust: none;}
 h2{margin:16px 0}
 hr{border:none;border-top:1px solid #999}
 form{margin:0}
@@ -33,7 +40,7 @@ form{margin:0}
 .ws2017_chart_table td{border:.38mm solid #333;padding:0;font-size:13px;height:2.0cm}
 .ws2017_chart_table thead td{height:.6cm}
 
-.ws2017_chart_sn{padding:10px;display:grid;align-items:center;font-size:16px}
+.ws2017_chart_sn{padding:5px;display:grid;align-items:center;font-size:16px;font-family:Arial Narrow}
 .ws2017_chart_sn a{color:#000;text-decoration:none}
 .ws2017_chart_sn a:hover{color:blue;text-decoration:underline}
 .ws2017_chart_attributes{padding:0!important;height:2.0cm}
@@ -41,8 +48,9 @@ form{margin:0}
 .ws2017_chart_attributes>div:first-child{border-top:none}
 .ws2017_chart_attributes>div{border-top:.38mm solid #333}
 .ws2017_chart_attributes span+span{margin-left:1px}
+.ws2017_chart_source_cell{font-family:Arial Narrow}
 
-.ws2017_chart_table_discussion{display:grid;align-content:center;text-align:left!important;padding:10px;overflow:auto}
+.ws2017_chart_table_discussion{display:grid;align-content:center;text-align:left!important;padding:8px;overflow:auto}
 
 .sheet-1{background:#999;opacity:.6}
 .sheet-2{background:#ff0}
@@ -72,6 +80,10 @@ form{margin:0}
 </style>
 <script src="jquery.js"></script>
 <body>
+<?
+define("CHARTS", 1);
+require_once 'index.searchbar.php';
+?>
 
 <?php
 if (Env::$readonly) {
@@ -92,6 +104,10 @@ usort($chars, function($a, $b) {
 	return strnatcmp($c, $d);
 });
 
+foreach ($chars as $char) {
+	$char->db = DBCharacters::getCharacter($char->data[0], $version);
+}
+
 if (isset($_GET['ids_group'])) {
 	$all_ids = [];
 	foreach ($chars as $char) {
@@ -104,20 +120,34 @@ if (isset($_GET['ids_group'])) {
 		return ($all_ids[$char->data[Workbook::IDS]] >= 2);
 	}));
 	usort($chars, function($a, $b) {
-		return strcmp($a->data[Workbook::IDS], $b->data[Workbook::IDS]);
+		$result = strcmp($a->data[Workbook::IDS], $b->data[Workbook::IDS]);
+		if (!$result) {
+			return strcmp($a->sheet, $b->sheet);
+		}
+		return $result;
 	});
 }
 
 
-$sheets = [
-	0 => [],
-	1 => [],
-	2 => [],
-];
+if (!isset($_GET['ids_group'])) {
+	$sheets = [
+		0 => [],
+		1 => [],
+		2 => [],
+	];
 
-foreach ($chars as $char) {
-	$sheets[$char->sheet][] = $char;
-} unset($chars);
+	foreach ($chars as $char) {
+		$sheets[$char->sheet][] = $char;
+	} unset($chars);
+} else {
+	$sheets = [
+		0 => []
+	];
+
+	foreach ($chars as $char) {
+		$sheets[0][] = $char;
+	} unset($chars);
+}
 
 
 
@@ -154,7 +184,11 @@ foreach ($sheets as $sheet_number => $chars) {
 		}
 		if (count($chunk_chars)) {
 			$page = new Page();
-			$page->sheet_name  = 'IRGN2270WS2017v1.1' . $sheet_name;
+			if (!isset($_GET['ids_group'])) {
+				$page->sheet_name  = CharacterCache::getSheetName($version, $sheet_number);
+			} else {
+				$page->sheet_name  = substr(CharacterCache::getSheetName($version, 0), 0, -12) . ' Group by same IDS';
+			}
 			$page->page_number = $index + 1;
 			$page->total_pages = $total_pages;
 			$page->chars = $chunk_chars;
@@ -220,7 +254,7 @@ foreach ($pages as $page) {
 		</table>
 		<div class=ws2017_chart_table_outer>
 			<table class=ws2017_chart_table>
-				<col style="width:2cm">
+				<col style="width:1.5cm">
 				<col style="width:4cm">
 				<col>
 				<col>
@@ -229,7 +263,7 @@ foreach ($pages as $page) {
 				<col>
 				<col>
 				<col>
-				<col style="width:4cm">
+				<col style="width:6.8cm">
 				<thead>
 					<tr>
 						<td>SN</td>
@@ -270,10 +304,10 @@ foreach ($pages as $page) {
 	
 ?>
 				<tr class="sheet-<?=$char->sheet?>">
-					<td><div class=ws2017_chart_sn style="padding:10px;display:grid;align-items:center">
+					<td><div class=ws2017_chart_sn style="display:grid;align-items:center">
 						<a href="index.php?id=<?=$rowData[0]?>" target=_blank><?=$rowData[0]?></a>
 						<br>
-						<?=$rowData[Workbook::TS_FLAG] ? '簡' : '繁';?>
+						<?=$rowData[Workbook::TS_FLAG] ? 'Simp' : 'Trad';?>
 					</div></td>
 					<td>
 						<div class=ws2017_chart_attributes style="display:grid;grid-template-rows:1fr 1fr 1fr">
@@ -293,59 +327,64 @@ foreach ($pages as $page) {
 										echo '<span style="color:#999;font-family:sans-serif">(Empty)</span>';
 									}
 							?></div></div>
-							<div style="display:grid;grid-template-columns:1fr 2fr">
+							<div style="display:grid;grid-template-columns:1fr 1fr">
 								<div style="border-right:1px solid #333;display:grid;align-items:center"><?=$char->getFirstStroke()?></div>
 								<div style="display:grid;align-items:center"><?=$char->getTotalStrokes()?></div>
 							</div>
 						</div>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::G_SOURCE]) || isset($rowData[Workbook::G_SOURCE+1])) {?>
-						<? if (substr($rowData[Workbook::G_SOURCE], 0, 3) === 'GXM' || substr($rowData[Workbook::G_SOURCE], 0, 3) === 'GDM' || substr($rowData[Workbook::G_SOURCE], 0, 3) === 'GKJ') {?>
-							<img src="<?=EVIDENCE_PATH?>/g-bitmap/<?=substr($rowData[Workbook::G_SOURCE+1], 0, -4)?>.png" width="40" height="32" style="object-fit:cover"><br>
-						<? } else { ?>
-							<img src="<?=EVIDENCE_PATH?>/g-bitmap/<?=substr($rowData[Workbook::G_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br>
-						<? } ?>
-							<?=$rowData[Workbook::G_SOURCE]?>
-						<?php } ?>
+					<td class=ws2017_chart_source_cell>
+<?php if (isset($rowData[Workbook::G_SOURCE]) || isset($rowData[Workbook::G_SOURCE+1])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::G_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$rowData[Workbook::G_SOURCE]?>
+<?php } ?>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::K_SOURCE]) || isset($rowData[Workbook::K_SOURCE+1])) {?>
-							<img src="http://www.koreanhistory.or.kr/newchar/fontimg/KC<?=substr($rowData[Workbook::K_SOURCE+1], 3, -4)?>_48.GIF" width="32" height="32"><br>
-							<?=$rowData[Workbook::K_SOURCE]?><?php } ?>
+					<td class=ws2017_chart_source_cell>
+<?php if (isset($rowData[Workbook::K_SOURCE]) || isset($rowData[Workbook::K_SOURCE+1])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::K_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$rowData[Workbook::K_SOURCE]?>
+<?php } ?>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::SAT_SOURCE]) || isset($rowData[Workbook::SAT_SOURCE+1])) {?>
-							<img src="https://glyphwiki.org/glyph/sat_g9<?=substr($rowData[Workbook::SAT_SOURCE+1], 4, -4)?>.svg" width="32" height="32"><br>
-							<?=$rowData[Workbook::SAT_SOURCE]?>
-						<?php } ?>
+					<td class=ws2017_chart_source_cell>
+<?php if (isset($rowData[Workbook::SAT_SOURCE]) || isset($rowData[Workbook::SAT_SOURCE+1])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::SAT_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$rowData[Workbook::SAT_SOURCE]?>
+<?php } ?>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::T_SOURCE]) || isset($rowData[Workbook::T_SOURCE + 1])) {?>
-							<img src="https://www.cns11643.gov.tw/cgi-bin/ttf2png?page=<?=hexdec(substr($rowData[Workbook::T_SOURCE], 1, -5))?>&amp;number=<?=substr($rowData[Workbook::T_SOURCE], -4)?>&amp;face=sung&amp;fontsize=512" width=32 height=32><br>
-							<?=$rowData[Workbook::T_SOURCE]?>
-						<?php } ?>
+					<td class=ws2017_chart_source_cell>
+<?php if (isset($rowData[Workbook::T_SOURCE]) || isset($rowData[Workbook::T_SOURCE + 1])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::T_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$rowData[Workbook::T_SOURCE]?>
+<?php } ?>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::UTC_SOURCE])) {?>
-							<img src="<?=EVIDENCE_PATH?>/utc-bitmap/<?=substr($rowData[Workbook::UTC_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br><?=$rowData[Workbook::UTC_SOURCE]?>
-						<? } ?>
+					<td class=ws2017_chart_source_cell>
+<?php if (isset($rowData[Workbook::UTC_SOURCE])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::UTC_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$rowData[Workbook::UTC_SOURCE]?>
+<? } ?>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::UK_SOURCE])) {?>
-						<img src="<?=EVIDENCE_PATH?>/uk-bitmap/<?=$rowData[Workbook::UK_SOURCE]?>.png" width="32" height="32"><br><?=$rowData[Workbook::UK_SOURCE]?>
-						<?php } ?>
+					<td class=ws2017_chart_source_cell>
+<?php if (isset($rowData[Workbook::UK_SOURCE])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::UK_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$rowData[Workbook::UK_SOURCE]?>
+<? } ?>
 					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::V_SOURCE])) {?>
-							<img src="<?=EVIDENCE_PATH?>/v-bitmap/<?=substr($rowData[Workbook::V_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br><?=$rowData[Workbook::V_SOURCE]?>
-						<? } ?>
+					<td class=ws2017_chart_source_cell>
+<? if (strcmp($version, '5.1') >= 0) { 
+	$vSourceText = vSourceFixup($rowData[Workbook::V_SOURCE]);
+} else {
+	$vSourceText = $rowData[Workbook::V_SOURCE];
+} ?>
+<?php if (isset($rowData[Workbook::V_SOURCE])) {?>
+	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::V_SOURCE], $version)?>" width="32" height="32"><br>
+	<?=$vSourceText?>
+<? } ?>
 					</td>
 					<td>
 						<div class=ws2017_chart_table_discussion>
 							<div>
-								<? if ($char->sheet) echo '<b>'.CharacterCache::SHEETS[$char->sheet] . '</b><br>'; ?>
-								<?=$rowData[Workbook::DISCUSSION_RECORD]?>
+								<? if ($char->sheet) echo '<b>'.CharacterCache::getSheetName($char->version, $char->sheet) . '</b><br>'; ?>
+								<?=$char->db->discussion_record?>
 							</div>
 						</div>
 					</td>

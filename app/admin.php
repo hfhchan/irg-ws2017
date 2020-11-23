@@ -10,10 +10,10 @@ if (isset($_POST['action']) && $_POST['action'] === 'login') {
 	$q->execute([ $_POST['username'] ]);
 	$password = $q->fetchColumn();
 	if (!$password) {
-		throw new BadParamException('$username incorrect');
+		throw new Exception('$username incorrect');
 	}
 	if (!password_verify($_POST['password'], $password)) {
-		throw new BadParamException('$password incorrect');
+		throw new Exception('$password incorrect');
 	}
 
 	$q = $user_db->prepare('SELECT "id" FROM users WHERE username=?');
@@ -23,20 +23,44 @@ if (isset($_POST['action']) && $_POST['action'] === 'login') {
 	$session_id = bin2hex(random_bytes(16));
 	$expiry = date('Y-m-d H:i:s', time() + 60 * 60 * 3);
 
-	$q = $user_db->prepare('INSERT INTO session ("user_id", "session_id", "expires") VALUES (?, ?, ?)');
+	$q = $session_db->prepare('INSERT INTO session ("user_id", "session_id", "expires") VALUES (?, ?, ?)');
 	$q->execute([$user_id, $session_id, $expiry]); // 3 hours
 	
 	setcookie('IRG_SESSION', $session_id, 0, null, null, true, true);
-	header('Location: admin.php?logged_in');
+	
+	$new_user = IRGUser::getById($user_id);
+	if ($new_user->isAdmin()) {
+?>
+<script>
+const bc = new BroadcastChannel('account');
+bc.postMessage('login');
+window.location.href = 'admin.php?logged_in';
+</script>
+<?
+	} else {
+?>
+<script>
+const bc = new BroadcastChannel('account');
+bc.postMessage('login');
+window.location.href = 'index.php?logged_in';
+</script>
+<?
+	}
 	exit;
 }
 
 if (isset($_POST['action']) && $_POST['action'] === 'logout') {
 	if ($session->isLoggedIn()) {
-		$q = $user_db->prepare('UPDATE session SET "expires" = DATETIME(\'NOW\') WHERE "session_id" = ?');
+		$q = $session_db->prepare('UPDATE session SET "expires" = DATETIME(\'NOW\') WHERE "session_id" = ?');
 		$q->execute([ $_COOKIE['IRG_SESSION'] ]); // 3 hours
 		setcookie('IRG_SESSION', 'null', 0, null, null, true, true);
-		header('Location: index.php');
+?>
+<script>
+const bc = new BroadcastChannel('account');
+bc.postMessage('logout');
+window.location.href = 'index.php?logged_out';
+</script>
+<?
 		exit;
 	}
 }
@@ -46,12 +70,12 @@ if (isset($_POST['action']) && $_POST['action'] === 'change_password') {
 		throw new Exception('Not logged in!');
 	}
 	
-	if ($_POST['password'] !== $_POST['password_confirm']) {
+	if ($_POST['new_password'] !== $_POST['new_password_confirm']) {
 		throw new Exception('Password not matched');
 	}
-	$pwd_hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
-	$q = $user_db->prepare('UPDATE users SET "password" = ? WHERE "username" = ?');
-	$q->execute([$pwd_hash, $session->getUser()->getUsername()]);
+	$pwd_hash = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
+	$q = $user_db->prepare('UPDATE users SET "password" = ?, "need_reset" = ? WHERE "username" = ?');
+	$q->execute([$pwd_hash, null, $session->getUser()->getUsername()]);
 	
 	header('Location: admin.php?password_changed');
 	exit;
@@ -64,25 +88,26 @@ if (isset($_POST['action']) && $_POST['action'] === 'register') {
 		throw new Exception('Not logged in as admin!');
 	}
 
-	$username = $_POST['username'];
-	$pwd_hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
+	$username = $_POST['new_username'];
+	$pwd_hash = password_hash($_POST['new_password'], PASSWORD_BCRYPT);
 	$name = $_POST['name'];
+	$organization = $_POST['organization'];
 
 	$q = $user_db->query('SELECT "password" FROM users WHERE username="admin"');
 	$master_hash = $q->fetchColumn();
 	if (!password_verify($_POST['master_pwd'], $master_hash)) {
-		throw new BadParamException('$master_pwd incorrect');
+		throw new Exception('$master_pwd incorrect');
 	}
 
 	$q = $user_db->prepare('SELECT COUNT(*) FROM users WHERE username=?');
-	$q->execute([$username]);
+	$q->execute([ $username ]);
 	$count = $q->fetchColumn();
 	if ($count) {
-		throw new BadParamException('$username already taken.');
+		throw new Exception('$username already taken.');
 	}
 	
-	$q = $user_db->prepare('INSERT INTO users ("username", "password", "name") VALUES (?, ?, ?)');
-	$q->execute([$username, $pwd_hash, $name]);
+	$q = $user_db->prepare('INSERT INTO users ("username", "password", "organization", "name") VALUES (?, ?, ?, ?)');
+	$q->execute([ $username, $pwd_hash, $organization, $name ]);
 	
 	header('Location: admin.php?user_added');
 	exit;
@@ -91,7 +116,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'register') {
 
 ?>
 <!doctype html>
-
+<title>Admin - IRG Online Review Tool</title>
+<meta charset=utf-8>
 <style>
 body{margin:0;font-family:Arial, sans-serif}
 hr{margin:10px 0;border:1px solid #999;border-width:1px 0 0}
@@ -121,6 +147,11 @@ h1{margin:10px 0;font-size:36px}
 		<input name=action value=login type=hidden>
 	</form>
 <? else: ?>
+<? if ($session->getUser()->isNeedReset()) : ?>
+<script>
+alert('Please change password.');
+</script>
+<? endif; ?>
 	<div>
 		<h1>Logged In</h1>
 		<div class=field>
@@ -137,12 +168,16 @@ h1{margin:10px 0;font-size:36px}
 			<div>Admin</div>
 		</div>
 <? endif; ?>
+		<form method=post id=logout>
+			<div class=submit><input type=submit value="Log Out"></div>
+			<input name=action value=logout type=hidden>
+		</form>
 	</div>
 	<br>
-	<form method=post id=change_password>
+	<form method=post id=change_password autocomplete=off>
 		<h2>Change Password</h2>
-		<div class=field><label>Password:</label> <input name=password type=password></div>
-		<div class=field><label title="Confirm Password">Type Again:</label> <input name=password_confirm type=password></div>
+		<div class=field><label>Password:</label> <input name=new_password type=password autocomplete=off data-lpignore="true" role="new-password"></div>
+		<div class=field><label title="Confirm Password">Type Again:</label> <input name=new_password_confirm type=password autocomplete=off data-lpignore="true"></div>
 		<div class=submit><input type=submit value="Change Password"></div>
 		<input name=action value=change_password type=hidden>
 	</form>
@@ -151,14 +186,48 @@ h1{margin:10px 0;font-size:36px}
 
 <? if ($session->isLoggedIn() && $session->getUser()->isAdmin()) : ?>
 <hr>
+<a href="admin-import-changes.php" target=_blank>Import changes from Excel</a>
+<a href="admin-review-changes.php" target=_blank>Review changes</a>
+<hr>
+<style>
+#session_list{border-collapse:collapse;width:100%}
+#session_list th,#session_list td{text-align:left;border:1px solid #ccc;padding:5px 10px}
+</style>
+<section>
+	<h1>Currently Logged In</h1>
+	<table id=session_list>
+		<tr>
+			<th>User</th>
+			<th>Expires</th>
+		</tr>
+<?
+	$q = $session_db->query("SELECT * FROM session WHERE expires > datetime(\"now\") ORDER BY expires DESC");
+	$data = $q->fetchAll();
+	foreach ($data as $row) {
+		$this_user = IRGUser::getById($row->user_id);
+?>
+		<tr>
+			<th>
+				<div><?=nl2br(htmlspecialchars($this_user->getName()))?></div>
+				<div style="color:#666;font-size:13px"><?=(htmlspecialchars($this_user->getOrganization()))?></div>
+			</th>
+			<td><?=htmlspecialchars($row->expires)?></td>
+		</tr>
+<?
+	}
+?>
+	</table>
+</section>
+<hr>
 <section>
 	<form method=post id=register>
 		<h1>Register User</h1>
-		<div class=field><label>Admin Pwd:</label> <input name=master_pwd type=password></div>
+		<div class=field><label>Admin Pwd:</label> <input name=master_pwd type=password autocomplete=off data-lpignore="true"></div>
 		<hr>
-		<div class=field><label>Name:</label> <input name=name></div>
-		<div class=field><label>Username:</label> <input name=username></div>
-		<div class=field><label>Password:</label> <input name=password type=password></div>
+		<div class=field><label>Name:</label> <input name=name autocomplete=off data-lpignore="true"></div>
+		<div class=field><label>Organization:</label> <input name=organization autocomplete=off data-lpignore="true"></div>
+		<div class=field><label>Username:</label> <input name=new_username autocomplete=off data-lpignore="true"></div>
+		<div class=field><label>Password:</label> <input name=new_password type=password autocomplete=off data-lpignore="true"></div>
 		<div class=submit><input type=submit value=Register></div>
 		<input name=action value=register type=hidden>
 	</form>
@@ -166,8 +235,10 @@ h1{margin:10px 0;font-size:36px}
 <? endif; ?>
 
 <hr>
+<? if (!$session->isLoggedIn() || !$session->getUser()->isNeedReset()) : ?>
 <div align=center>
 	<a href=".">Return to Index</a>
 </div>
+<? endif; ?>
 
 </div>
