@@ -17,6 +17,8 @@ define('EVIDENCE_PATH', '../data');
 
 if ($session->isLoggedIn() && $session->getUser()->isAdmin()) {
 	if (isset($_POST['action']) && $_POST['action'] == 'change') {
+		echo 'Disabled';
+		exit;
 		if (!isset($_POST['value']) || trim($_POST['value']) === '') {
 			echo 'Value cannot be empty';
 			exit;

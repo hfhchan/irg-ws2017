@@ -186,8 +186,11 @@ alert('Please change password.');
 
 <? if ($session->isLoggedIn() && $session->getUser()->isAdmin()) : ?>
 <hr>
-<a href="admin-import-changes.php" target=_blank>Import changes from Excel</a>
-<a href="admin-review-changes.php" target=_blank>Review changes</a>
+<div><a href="admin-apply-changes.php" target=_blank>Apply changes directly from Consolidated Comments</a></div>
+<div><a href="apply-changes.php" target=_blank>Apply changes from Discussion Record</a></div>
+<div><a href="admin-import-changes.php" target=_blank>Import changes from Excel</a></div>
+<div><a href="admin-review-changes.php" target=_blank>Change Log</a></div>
+<div><a href="excel.php" target=_blank>Export data to Excel</a></div>
 <hr>
 <style>
 #session_list{border-collapse:collapse;width:100%}
