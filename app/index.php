@@ -658,6 +658,13 @@ if (!env::$readonly && $session->isLoggedIn()) {
 				echo '<div style="font-size:13px">'.htmlspecialchars($cm->type).'</div>';
 			}
 			echo '<div style="font-size:13px;margin-top:4px">WS2017 v'.$cm->version.'</div>';
+
+			if ($cm->version !== $version) {
+				if (!$cm->isResolved($version)) {
+					echo '<div style="font-size:13px;color:red"><b>[ Unresolved ]</b></div>';
+				}
+			}
+
 			echo '</td>';
 			echo '<td>';
 

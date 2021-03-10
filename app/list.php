@@ -343,6 +343,13 @@ foreach ($chunks as $category => $chunk) {
 			echo '<div>' . $cm->toLocalTime() . '</div>';
 			echo "\n";
 		}
+
+		if ($cm->version !== $version) {
+			if (!$cm->isResolved($version)) {
+				echo '<div style="font-size:13px;color:red"><b>[ Unresolved from v' . $cm->version  . ' ]</b></div>';
+			}
+		}
+
 		echo '</td>';
 		echo '<td>';
 

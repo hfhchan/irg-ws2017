@@ -107,6 +107,11 @@ class DBComments {
 		return $type;
 	}
 
+	public function isResolved($version = null) {
+		if ($version == null) $version = Workbook::VERSION;
+		return $this->resolved !== null && strcmp($this->resolved, $version) <= 0;
+	}
+
 	public function getTypeIndex() {
 		$type = $this->type;
 		if ($type === 'LABEL') {
@@ -139,8 +144,12 @@ class DBComments {
 		if ($version === null) {
 			$version = Workbook::VERSION;
 		}
-		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "created_by" = ? AND "version" = ? ORDER BY "created_at" ASC');
-		$q->execute([ $user, $version ]);
+		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "created_by" = ? AND (
+			"version" = ? OR
+			"resolved" IS NULL OR
+			"resolved" >= ?
+		) ORDER BY "created_at" ASC');
+		$q->execute([ $user, $version, $version ]);
 		$results = [];
 		while ($data = $q->fetch()) {
 			$results[] = new self($data);
@@ -152,8 +161,8 @@ class DBComments {
 		if ($version === null) {
 			$version = Workbook::VERSION;
 		}
-		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? ORDER BY "created_at" ASC');
-		$q->execute([ $version ]);
+		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? OR "resolved" IS NULL OR "resolved" >= ? ORDER BY "created_at" ASC');
+		$q->execute([ $version, $version ]);
 		$results = [];
 		while ($data = $q->fetch()) {
 			$results[] = new self($data);
