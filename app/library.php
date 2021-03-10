@@ -404,10 +404,10 @@ function codepointIsIDC($codepoint) {
 require_once '../../../IDS/library.php';
 
 
-function getImageHTML($codepoint) {
+function getImageHTML($codepoint, $version=9) {
 	if ($codepoint[2] === 'F' || ($codepoint[2] === '2' && $codepoint[3] === 'F')) {
-		return '<img src="../../../Code Charts/UCSv9/Compat/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
+		return '<img src="../../../Code Charts/UCSv' . $version . '/Compat/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
 	} else {
-		return '<img src="../../../Code Charts/UCSv9/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
+		return '<img src="../../../Code Charts/UCSv' . $version . '/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:100%"><br>';
 	}
 }

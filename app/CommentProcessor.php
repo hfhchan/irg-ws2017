@@ -59,7 +59,7 @@ class CommentProcessor {
 			}
 		}
 		
-		preg_match_all("/ (([\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}])|(WS(2015|2017))-([0-9]{5}))/u", $str, $matches);
+		preg_match_all("/ (([\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}])|(WS(2015|2017))-([0-9]{5}))/u", $str, $matches);
 
 
 		foreach ($matches[1] as $i => $match) {
@@ -253,35 +253,35 @@ class CommentProcessor {
 			$fsChanges['FS=' . $match] = true;
 		}
 
-		preg_match_all("/ids .* be changed (from.*)?(back )?to\s*([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
+		preg_match_all("/ids .* be changed (from.*)?(back )?to\s*([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
 		foreach ($idsMatches[3] as $i => $match) {
 			$idsChanges['IDS=' . $match] = true;
 		}
 
-		preg_match_all("/ids should be\s*([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
+		preg_match_all("/ids should be\s*([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
 		foreach ($idsMatches[1] as $i => $match) {
 			$idsChanges['IDS=' . $match] = true;
 		}
 
-		preg_match_all("/change ids to\s*([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
+		preg_match_all("/change ids to\s*([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
 		foreach ($idsMatches[1] as $i => $match) {
 			$idsChanges['IDS=' . $match] = true;
 		}
 
 		if ($this->comment->type === 'ATTRIBUTES_IDS') {
 			$firstLine = strtok($this->comment->comment, "\n");
-			if (preg_match('/^(Change to\s+)?([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)(\\.|$| )/u', trim($firstLine), $idsMatch)) {
+			if (preg_match('/^(Change to\s+)?([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)(\\.|$| )/u', trim($firstLine), $idsMatch)) {
 				$tsChanges['IDS=' . trim($idsMatch[2])] = true;
 			}
-			if (preg_match('/(Change the IDS to\s+)?([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)(\\.|$| )/u', trim($firstLine), $idsMatch)) {
+			if (preg_match('/(Change the IDS to\s+)?([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)(\\.|$| )/u', trim($firstLine), $idsMatch)) {
 				$tsChanges['IDS=' . trim($idsMatch[2])] = true;
 			}
-			if (preg_match('/(IDS change to\s+)?([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)(\\.|$| )/u', trim($firstLine), $idsMatch)) {
+			if (preg_match('/(IDS change to\s+)?([\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)(\\.|$| )/u', trim($firstLine), $idsMatch)) {
 				$tsChanges['IDS=' . trim($idsMatch[2])] = true;
 			}
 		}
 
-		preg_match_all("/ids.*suggest.*?([\x{2E80}-\x{2EF3}\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
+		preg_match_all("/ids.*suggest.*?([\x{2E80}-\x{2EF3}\x{2FF0}-\x{2FFFF}\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]+)/u", strtolower($this->comment->comment), $idsMatches);
 		foreach ($idsMatches[1] as $i => $match) {
 			$idsChanges['IDS=' . $match] = true;
 		}
@@ -341,13 +341,13 @@ class CommentProcessor {
 		$outputted = [];
 
 		foreach ($targets as $target) {
-			if (preg_match('/[\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}]/u', $target)) {
+			if (preg_match('/[\x{3000}-\x{9FFF}\x{20000}-\x{3FFFF}]/u', $target)) {
 				$codepoint = charToCodepoint($target);
 				if (isset($outputted[$codepoint])) {
 					continue;
 				}
 				$outputted[$codepoint] = true;
-				echo getImageHTML($codepoint);
+				echo getImageHTML($codepoint, strcmp($this->version, '5.2') >= 0 ? 13 : 9);
 			}
 			if (preg_match('/(WS(2015|2017))-([0-9]{5})/u', $target, $matches)) {
 				$year = $matches[2];
