@@ -88,14 +88,18 @@ foreach ($sheets as $sheet_number => $chars) {
 		$objPHPExcel->getActiveSheet()->SetCellValue('E'.$rowCount, $char->first_stroke);
 		$objPHPExcel->getActiveSheet()->SetCellValue('F'.$rowCount, $char->trad_simp_flag);
 		$objPHPExcel->getActiveSheet()->SetCellValue('G'.$rowCount, $char->ids);
-		$objPHPExcel->getActiveSheet()->SetCellValue('H'.$rowCount, $char->total_stroke_count);
+
+		$total_stroke_count = str_replace('22,21', '22', $char->total_stroke_count);
+		$objPHPExcel->getActiveSheet()->SetCellValue('H'.$rowCount, $total_stroke_count);
 		$objPHPExcel->getActiveSheet()->SetCellValue('I'.$rowCount, $char->g_source);
 		$objPHPExcel->getActiveSheet()->SetCellValue('J'.$rowCount, $char->k_source);
 		$objPHPExcel->getActiveSheet()->SetCellValue('K'.$rowCount, $char->uk_source);
 		$objPHPExcel->getActiveSheet()->SetCellValue('L'.$rowCount, $char->sat_source);
 		$objPHPExcel->getActiveSheet()->SetCellValue('M'.$rowCount, $char->t_source);
 		$objPHPExcel->getActiveSheet()->SetCellValue('N'.$rowCount, $char->utc_source);
-		$objPHPExcel->getActiveSheet()->SetCellValue('O'.$rowCount, $char->v_source);
+
+		$v_source = strcmp($version, '5.1') >= 0 ? vSourceFixup($char->v_source) : $char->v_source;
+		$objPHPExcel->getActiveSheet()->SetCellValue('O'.$rowCount, $v_source);
 	} 
 
 }
