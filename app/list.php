@@ -294,7 +294,8 @@ foreach ($chunks as $category => $chunk) {
 			}
 		}
 
-		$sheet = $character_cache->get(sprintf('%05d', $cm->sn))->sheet;
+		$char = DBCharacters::getCharacter($cm->getSN(), $version);
+		$sheet = $char->status;
 
 		$j = $i + 1;
 		while (isset($chunk[$j]) && $chunk[$j]->getSN() == $cm->getSN()) {
@@ -311,7 +312,6 @@ foreach ($chunks as $category => $chunk) {
 		if ($lastSN != $cm->getSN()) {
 			echo '<td rowspan="'.$rowSpan.'"><b><a href="index.php?id='.htmlspecialchars($cm->getSN()).'" target=_blank>'.htmlspecialchars($cm->getSN()).'</a></b></td>';
 			echo '<td rowspan="'.$rowSpan.'">';
-			$char = $character_cache->getVersion($cm->getSN(), $version);
 			//echo '<div style="width:154px;overflow:hidden">';
 			//echo '<div style="width:1054px;margin-left:-'.($char->getSourceIndex()*150).'px">';
 			//$char->renderCodeChartCutting();
