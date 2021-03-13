@@ -524,7 +524,20 @@ foreach ($data as $char) {
 			echo '<img src="https://glyphwiki.org/glyph/hkcs_m'.strtolower(substr($codepoint, 2)).'.svg" alt="'.$codepoint.'" height=72 width=72 style="vertical-align:top">';
 			echo '</a>';
 			if (strcmp($version, '5.2') >= 0) {
-				echo '<img src="https://hc.jsecs.org/Code%20Charts/UCSv13/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'">';
+				$codepoint_folder_prefix = substr($codepoint, 2, -2);
+				if (
+					$codepoint_folder_prefix == 'F9' ||
+					$codepoint_folder_prefix == 'FA' ||
+					$codepoint_folder_prefix == '2F8' ||
+					$codepoint_folder_prefix == '2F8' ||
+					$codepoint_folder_prefix == '2F9' ||
+					$codepoint_folder_prefix == '2FA'
+				) {
+					$max_width = '300px';
+				} else {
+					$max_width = '480px';
+				}
+				echo '<img src="https://hc.jsecs.org/Code%20Charts/UCSv13/Excerpt/'.$codepoint_folder_prefix.'/'.$codepoint.'.png" alt="'.$codepoint.'" style="max-width:' . $max_width . '">';
 			} else {
 				echo '<img src="https://hc.jsecs.org/Code%20Charts/UCSv9/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'">';
 			}

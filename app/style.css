@@ -31,6 +31,10 @@ blockquote{margin:10px 0;padding:0;padding-left:10px;border-left:3px solid #ccc}
 .ws2017_content{display:grid;grid-template-columns:802px 1fr;grid-column-gap:20px;margin-top:10px}
 
 .ws2017_similar_char{border:1px solid #ccc;padding:10px;margin-bottom:10px}
+.ws2017_similar_char{display:flex}
+.ws2017_similar_char > a{flex:none}
+.ws2017_similar_char > img{min-width:0;flex:0 1 auto}
+
 .ws2017_evidence a.evidence_image{border:1px solid #ccc;display:block;background:#fcfcfc}
 .ws2017_evidence img{display:block;max-width:800px;max-height:400px;object-fit:scale-down;margin:10px auto;background:#fff}
 .ws2017_evidence img.full{max-height:none}
