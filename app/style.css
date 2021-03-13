@@ -162,7 +162,7 @@ a.review_all{font-size:16px;border:1px solid #ccc;padding:4px 12px;display:block
 	.meeting_mode .ws2017_char>hr{display:none}
 	.meeting_mode .ws2017_char + script + .ws2017_char{margin-top:20px}
 	.meeting_mode .ws2017_char_nav{display:none}
-	.meeting_mode .ws2017_chart_table{grid-template-columns:80px 200px 1fr 358px;grid-column:1 / 3}
+	.meeting_mode .ws2017_chart_table{grid-template-columns:80px 200px 1fr 358px;grid-column:1 / 3;overflow: auto}
 	.meeting_mode .ws2017_chart_attributes > div{padding:2px 8px}
 	.meeting_mode .ws2017_chart_attributes_ids{white-space:nowrap;overflow:hidden}
 	
