@@ -377,9 +377,8 @@ window.location.href = 'admin.php';
 <script>
 document.body.classList.add('meeting_mode');
 $(() => {
-	let version = +<?=$version?>;
-	$('.ws2017_comments tbody>tr[data-version="' + version + '"]').first()[0].scrollIntoView();
-	$('.ws2017_comments tbody>tr[data-version!="' + version + '"]').css('opacity', '.1').css('transition', 'all 200ms').hover(e => {
+	$('.ws2017_comments tbody>tr.comment_new').first()[0].scrollIntoView();
+	$('.ws2017_comments tbody>tr:not(.comment_new)').css('opacity', '.1').css('transition', 'all 200ms').hover(e => {
 		$(e.currentTarget).css('opacity', .8).css('background', '#eee');
 	}, e => {
 		$(e.currentTarget).css('opacity', .1).css('background', '');
@@ -662,11 +661,14 @@ if (!env::$readonly && $session->isLoggedIn()) {
 			if ($cm->type === 'LABEL') {
 				continue;
 			}
-			if ($cm->isDeleted()) {
-				echo '<tr class=comment_deleted data-version="'.htmlspecialchars($cm->version).'">';
-			} else {
-				echo '<tr data-version="'.htmlspecialchars($cm->version).'">';
+			$tableRowClass = [];
+			if ($cm->version == $version || !$cm->isResolved()) {
+				$tableRowClass[] = 'comment_new';
 			}
+			if ($cm->isDeleted()) {
+				$tableRowClass[] = 'comment_deleted';
+			}
+			echo '<tr class="' . implode(' ', $tableRowClass) . '" data-version="'.htmlspecialchars($cm->version).'">';
 			echo '<td>';
 			echo '<div><b>' . $cm->getCategoryForCommentType() . '</b></div>';
 			if (substr($cm->type, -strlen('_RESPONSE')) === '_RESPONSE') {
