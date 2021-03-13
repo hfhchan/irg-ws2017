@@ -146,10 +146,9 @@ class DBComments {
 		}
 		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "created_by" = ? AND (
 			"version" = ? OR
-			"resolved" IS NULL OR
-			"resolved" >= ?
+			("version" < ? AND ("resolved" IS NULL OR "resolved" >= ?))
 		) ORDER BY "created_at" ASC');
-		$q->execute([ $user, $version, $version ]);
+		$q->execute([ $user, $version, $version, $version ]);
 		$results = [];
 		while ($data = $q->fetch()) {
 			$results[] = new self($data);
@@ -161,8 +160,8 @@ class DBComments {
 		if ($version === null) {
 			$version = Workbook::VERSION;
 		}
-		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? OR "resolved" IS NULL OR "resolved" >= ? ORDER BY "created_at" ASC');
-		$q->execute([ $version, $version ]);
+		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? OR ("version" < ? AND ("resolved" IS NULL OR "resolved" >= ?)) ORDER BY "created_at" ASC');
+		$q->execute([ $version, $version, $version ]);
 		$results = [];
 		while ($data = $q->fetch()) {
 			$results[] = new self($data);
