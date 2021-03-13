@@ -523,7 +523,11 @@ foreach ($data as $char) {
 			echo '<a href="https://localhost/unicode/fonts/gen-m.php?name=u'.strtolower(substr($codepoint, 2)).'" target=_blank style="margin-right:10px">';
 			echo '<img src="https://glyphwiki.org/glyph/hkcs_m'.strtolower(substr($codepoint, 2)).'.svg" alt="'.$codepoint.'" height=72 width=72 style="vertical-align:top">';
 			echo '</a>';
-			echo '<img src="https://hc.jsecs.org/Code%20Charts/UCSv9/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'">';
+			if (strcmp($version, '5.2') >= 0) {
+				echo '<img src="https://hc.jsecs.org/Code%20Charts/UCSv13/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'">';
+			} else {
+				echo '<img src="https://hc.jsecs.org/Code%20Charts/UCSv9/Excerpt/'.substr($codepoint, 2, -2).'/'.$codepoint.'.png" alt="'.$codepoint.'">';
+			}
 			echo '</div>';
 		}
 	}
