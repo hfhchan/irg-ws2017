@@ -1,6 +1,6 @@
 <?php
 
-define('MEETING_SESSION', 53);
+define('MEETING_SESSION', 56);
 define('MEETING_MODE', 1);
 
 require_once 'vendor/autoload.php';
