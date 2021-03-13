@@ -1,6 +1,6 @@
 <?php
 
-define('MEETING_SESSION', 54);
+define('MEETING_SESSION', 56);
 
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';
