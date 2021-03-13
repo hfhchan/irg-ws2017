@@ -32,7 +32,7 @@ if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
 	$version = Workbook::VERSION;
 }
 
-$title = 'IRG #' . ($version + 49) . ' | WS2017v' . $version;
+$title = 'IRG #' . MEETING_SESSION . ' | WS2017v' . $version;
 require_once 'index.header.php';
 require_once 'index.searchbar.php';
 

@@ -27,6 +27,15 @@ class DBCharacters {
 	public $utc_source;
 	public $v_source;
 
+	public static function toSessionNumber($version) {
+		if ($version == '5.2') return 5 + 2 + 49;
+		if ($version == '5.1') return 5 + 1 + 49;
+		if (strcmp($version, '5.0') <= 0) {
+			return intval($version) + 49;
+		}
+		return intval($version) + 2 + 49;
+	}
+
 	public function __construct(object $result, string $version = '4.0') {
 		$this->version = $version;
 
@@ -110,7 +119,7 @@ class DBCharacters {
 		}
 		
 		// Update Discussion Record
-		$max_session = intval($version) + 49;
+		$max_session = self::toSessionNumber($version);
 		$actions = DBDiscussionRecord::getAll($this->sn);
 		foreach ($actions as $action) {
 			if (isset($skipImportDiscussionRecord[$action->id])) {

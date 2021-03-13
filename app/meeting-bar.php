@@ -34,12 +34,12 @@ if ($user_id !== 0) {
 }
 
 
-if (isset($_GET['version'])) {
-	$version = strpos($_GET['version'], '.') === false ? intval($_GET['version']) . '.0' : floatval($_GET['version']);
-	$max_session = $version + 49;
+if (isset($_GET['version']) && DBVersions::hasVersion($_GET['version'])) {
+	$version = $_GET['version'];
+	$max_session = DBCharacters::toSessionNumber($version);
 } else {
 	$version = Workbook::VERSION;
-	$max_session = Workbook::VERSION + 49;
+	$max_session = DBCharacters::toSessionNumber($version);
 }
 
 const SOURCES = [
