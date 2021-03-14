@@ -80,13 +80,13 @@ foreach ($list as $source) {
 		continue;
 	}
 
-	if (!empty($char->g_source))   $sheets['G'][] = $char;
-	if (!empty($char->k_source))   $sheets['K'][] = $char;
-	if (!empty($char->uk_source))  $sheets['UK'][] = $char;
-	if (!empty($char->sat_source)) $sheets['SAT'][] = $char;
-	if (!empty($char->t_source))   $sheets['T'][] = $char;
-	if (!empty($char->utc_source)) $sheets['UTC'][] = $char;
-	if (!empty($char->v_source))   $sheets['V'][] = $char;
+	if (!empty($char->g_source))   $sheets['G'][$char->sn] = $char;
+	if (!empty($char->k_source))   $sheets['K'][$char->sn] = $char;
+	if (!empty($char->uk_source))  $sheets['UK'][$char->sn] = $char;
+	if (!empty($char->sat_source)) $sheets['SAT'][$char->sn] = $char;
+	if (!empty($char->t_source))   $sheets['T'][$char->sn] = $char;
+	if (!empty($char->utc_source)) $sheets['UTC'][$char->sn] = $char;
+	if (!empty($char->v_source))   $sheets['V'][$char->sn] = $char;
 }
 
 foreach ($sheets as $sourceName => $list) {
@@ -104,6 +104,8 @@ foreach ($sheets as $sourceName => $list) {
 	<col width=160>
 	<col width=420>
 <?php
+
+sort($list);
 
 foreach ($list as $char) {
 	$record = $char->discussion_record;
