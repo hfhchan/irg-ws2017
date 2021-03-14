@@ -71,8 +71,7 @@ foreach ($list as $source) {
 	if (isset($override[$char->sn])) {
 		$record = $override[$char->sn];
 	}
-	$unify = preg_match_all('@(^|[^0-9-])((U\\+[0-9A-F]{4,5})|([0-9]{5}))[^0-9]@', strtoupper($record), $matches);
-
+	$unify = preg_match_all('@(^|[^0-9-])((U\\+ ?[0-9A-F]{4,5})|([0-9]{5}))[^0-9]@', strtoupper($record), $matches);
 	echo '<tr>';
 	echo '<td>' . $char->sn . '</td>';
 	echo '<td>';
@@ -84,13 +83,13 @@ foreach ($list as $source) {
 	echo htmlspecialchars($record);
 	echo '</td>';
 	echo '<td>';
-	foreach ($matches[2] as $match) {
+	foreach (array_unique($matches[2]) as $match) {
 		try {
 			if (ctype_digit($match)) {
 				$char = DBCharacters::getCharacter($match);
 				$char->renderPart4();
 			} else {
-				$codepoint = 'U+' . ltrim(substr($match, 2), '0');
+				$codepoint = 'U+' . trim(ltrim(substr($match, 2), '0'));
 				echo getImageHTML($codepoint);
 			}
 		} catch (Exception $e) {
@@ -105,7 +104,7 @@ foreach ($list as $source) {
 </section>
 
 <div class=footer>
-	<p>Source Code released at <a href="https://github.com/hfhchan/irg-ws2015">https://github.com/hfhchan/irg-ws2015</a>.</p>
+	<p>Source Code released at <a href="https://github.com/hfhchan/irg-ws2017">https://github.com/hfhchan/irg-ws2017</a>.</p>
 </div>
 
 <script>
