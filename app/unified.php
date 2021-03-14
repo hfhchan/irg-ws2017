@@ -9,11 +9,17 @@ $sources_cache = new SourcesCache();
 $character_cache = new CharacterCache();
 $ids_cache = new IDSCache();
 
+if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
+	$version = $_GET['version'];
+} else {
+	$version = Workbook::VERSION;
+}
+
 ?>
 <!doctype html>
 <meta charset=utf-8>
 <meta name=viewport content="width=initial-width,initial-scale=1">
-<title>Unified | WS2017v<?=Workbook::VERSION?></title>
+<title>Unified | WS2017v<?=$version?></title>
 <link href="common.css" rel=stylesheet type="text/css">
 <style>
 [hidden]{display:none}
@@ -45,7 +51,7 @@ form{margin:0}
 <script src="jquery.js"></script>
 <body>
 <section class=ws2015_comments>
-	<h2>Unified</h2>
+	<h2>Discussion Log for unified &amp; withdrawn characters in WS2017v<?=$version?></h2>
 <?php
 
 $override = [
@@ -63,7 +69,7 @@ $sheets = [
 	'V' => [],
 ];
 foreach ($list as $source) {
-	$char = DBCharacters::getCharacter($source);
+	$char = DBCharacters::getCharacter($source, $version);
 	if ($char->status !== 1) {
 		continue;
 	}
