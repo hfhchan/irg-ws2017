@@ -51,7 +51,7 @@ form{margin:0}
 <script src="jquery.js"></script>
 <body>
 <section class=ws2015_comments>
-	<h2>Discussion Log for unified &amp; withdrawn characters in WS2017v<?=$version?></h2>
+	<h2>Discussion Log for unified characters in WS2017v<?=$version?></h2>
 <?php
 
 $override = [
@@ -74,6 +74,9 @@ foreach ($list as $source) {
 		continue;
 	}
 	if (strpos(strtolower($char->discussion_record), 'withdraw') !== false) {
+		continue;
+	}
+	if (strpos(strtolower($char->discussion_record), 'withdawn') !== false) {
 		continue;
 	}
 
