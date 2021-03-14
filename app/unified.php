@@ -54,8 +54,35 @@ form{margin:0}
 	<h2>Discussion Log for unified characters in WS2017v<?=$version?></h2>
 <?php
 
-$override = [
-	
+$adjustedRecords = [
+	// strip WS2017 sequence
+	'02192' => [ 'WS2017-02150', '02150'],
+	'03062' => [ 'WS2017-03060', '03060'],
+	'03396' => [ 'WS2017-03390', '03390'],
+	'00047' => [ 'WS2017-00046', '00046'],
+
+	// typo
+	'00161' => [ 'U+5052', 'U+50B2'],
+	'02844' => [ '02855', '02845'],
+	'01520' => [ '10521', '01521'],
+	'00712' => [ '0000709', '00709'],
+
+	// fix format
+	'00395' => [ '呼', 'U+547C'],
+
+	// Extension G
+	'01466' => [ 'USAT06427', 'U+30515'],
+	'00669' => [ 'UTC-01178', 'U+3025E'],
+	'00797' => [ 'KC-00737', 'U+302B1'],
+	'02903' => [ 'UK-02658', 'U+30980'],
+	'04071' => [ 'GHZR63806.05', 'U+30D9F'],
+	'02132' => [ 'T13-2D2B', 'U+30748'],
+	'03210' => [ 'T13-2F77', 'U+30A49'],
+	'04625' => [ 'T13-314B(ws2015sn04729)', 'U+31057'],
+	'01173' => [ 'WS2015-04663', 'U+31020'],
+	'02306' => [ 'USAT07218', 'U+30791'],
+	'02953' => [ 'T13-2F45', 'U+309AE'],
+	'03070' => [ 'ws2015-UK-02654', 'U+30A02'],
 ];
 
 $list = $sources_cache->getAll();
@@ -109,9 +136,10 @@ sort($list);
 
 foreach ($list as $char) {
 	$record = $char->discussion_record;
-	if (isset($override[$char->sn])) {
-		$record = $override[$char->sn];
+	if (isset($adjustedRecords[$char->sn])) {
+		$record = str_replace($adjustedRecords[$char->sn][0], $adjustedRecords[$char->sn][1], $record);
 	}
+
 	$unify = preg_match_all('@(^|[^0-9-])((U\\+ ?[0-9A-F]{4,5})|([0-9]{5}))[^0-9]@', strtoupper($record), $matches);
 	echo '<tr>';
 	echo '<td>' . $char->sn . '</td>';
@@ -121,7 +149,7 @@ foreach ($list as $char) {
 	echo '</a>';
 	echo '</td>';
 	echo '<td>';
-	echo htmlspecialchars($record);
+	echo htmlspecialchars($char->discussion_record);
 	echo '</td>';
 	echo '<td>';
 	foreach (array_unique($matches[2]) as $match) {
