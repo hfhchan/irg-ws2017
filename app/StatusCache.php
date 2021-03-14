@@ -28,8 +28,8 @@ class StatusCache {
 			$status = [];
 			$image = [];
 			foreach ($sources as $sn => $source_list) {
-				$char = $character_cache->getVersion($sn, $version);
-				$sheet = $char->sheet;
+				$char = DBCharacters::getCharacter($sn, $version);
+				$sheet = $char->status;
 				$images = [];
 				foreach ($source_list as $source) {
 					$images[] = WSCharacter::getFileName($source, $version);
@@ -62,12 +62,12 @@ class StatusCache {
 			foreach ($allSources as $sourceKey => $sourceVal) {
 				$sourceSheet = 99;
 				foreach ($sourceVal as $id) {
-					$char = $character_cache->getVersion($id, $version);
-					$sheet = $char->sheet;
+					$char = DBCharacters::getCharacter($id, $version);
+					$sheet = $char->status;
 					if ($sheet < $sourceSheet) {
 						$sourceSheet = $sheet;
 					}
-				}			
+				}
 				$status[$sourceKey] = array(
 					'sheet' => $sourceSheet,
 					'images' => [WSCharacter::getFileName($sourceKey, $version)]
