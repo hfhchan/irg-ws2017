@@ -131,7 +131,7 @@ class WSCharacter {
 		
 		// Apply Actions
 		$max_session = intval($version) + 49;
-		if ($version == '4.0' || $version == '5.0' || $version == '5.1') {
+		if ($version == '4.0' || $version == '5.0' || $version == '5.1' || $version == '5.2') {
 			$skipImportDiscussionRecord = [];
 			$changes = DBChanges::getChangesForSNVersion($this->data[0], $version);
 			foreach ($changes as $change) {
