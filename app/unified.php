@@ -129,7 +129,7 @@ foreach ($list as $char) {
 				$char->renderPart4();
 			} else {
 				$codepoint = 'U+' . trim(ltrim(substr($match, 2), '0'));
-				echo getImageHTML($codepoint);
+				echo getImageHTML($codepoint, strcmp($version, '5.2') >= 0 ? 13 : 9);
 			}
 		} catch (Exception $e) {
 			echo $e->getMessage();
