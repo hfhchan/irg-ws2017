@@ -377,7 +377,9 @@ window.location.href = 'admin.php';
 <script>
 document.body.classList.add('meeting_mode');
 $(() => {
-	$('.ws2017_comments tbody>tr.comment_new').first()[0].scrollIntoView();
+	const newComment = $('.ws2017_comments .ws2017_comments_tr.comment_new').first()[0];
+	if (newComment) newComment.scrollIntoView();
+
 	$('.ws2017_comments tbody>tr:not(.comment_new)').css('opacity', '.1').css('transition', 'all 200ms').hover(e => {
 		$(e.currentTarget).css('opacity', .8).css('background', '#eee');
 	}, e => {
