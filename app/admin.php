@@ -132,10 +132,10 @@ h1{margin:10px 0;font-size:36px}
 .submit{display:grid;justify-content:center} 
 .submit input{background:#36f;padding:4px 20px;border:none;color:#fff;font-family:inherit}
 
+.meeting_mode_btn{background:#f30;color:white;padding:4px 10px;text-decoration:none}
 </style>
 
 <div id=main>
-
 
 <section>
 <? if (!$session->isLoggedIn()) : ?>
@@ -152,6 +152,11 @@ h1{margin:10px 0;font-size:36px}
 alert('Please change password.');
 </script>
 <? endif; ?>
+	<div>
+		<h1>Quick Links</h1>
+		<a href="https://hc.jsecs.org/irg/ws2017/app/meeting-mode.php" class=meeting_mode_btn>MEETING MODE</a>
+	</div>
+	<br>
 	<div>
 		<h1>Logged In</h1>
 		<div class=field>
