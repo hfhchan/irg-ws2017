@@ -208,7 +208,7 @@ a.review_all{font-size:16px;border:1px solid #ccc;padding:4px 12px;display:block
 	.meeting_mode .ws2017_comments_comment_comment_date{display:flex;flex-wrap:wrap}
 	.meeting_mode .ws2017_comments_comment_comment_id{margin-top:0px;margin-left:auto}
 	
-	.meeting_bar{display:block;position:fixed;top:40px;bottom:0;width:100px;left:0;font-size:13px;background:#fff;overflow-y:auto}	
+	.meeting_bar{display:block;position:fixed;top:40px;bottom:0;width:100px;border-right:1px solid #999;box-sizing: border-box;left:0;font-size:13px;background:#fff;overflow-y:auto}	
 	.meeting_bar h3{font-size:13px;position:sticky;top:0;background:#fff;text-align:center;word-wrap:break-word;padding:10px 2px;margin:0;border-bottom:1px solid #999}
 	.meeting_bar a{display:block;text-decoration:none;color:#000;text-align:center;padding:5px 0;border:1px solid transparent}
 	.meeting_bar a.selected{border:1px solid #999;background:#eee}
