@@ -179,6 +179,8 @@ a.review_all{font-size:16px;border:1px solid #ccc;padding:4px 12px;display:block
 		width:auto;margin:0;border:none;padding:0;height:100vh;overflow:auto;box-sizing:border-box;
 		display: grid;grid-template-columns:3fr 4fr;grid-template-rows:80px 1fr 1fr
 	}
+	.meeting_mode .ws2017_char.ws2017_char_focus_comments{grid-template-columns:1fr 4fr;grid-template-rows:80px 4fr 1fr}
+	.meeting_mode .ws2017_char.ws2017_char_focus_actions{grid-template-columns:1fr 4fr;grid-template-rows:80px 1fr 4fr}
 	.meeting_mode .ws2017_char>hr{display:none}
 	.meeting_mode .ws2017_char + script + .ws2017_char{margin-top:20px}
 	.meeting_mode .ws2017_char_nav{display:none}
@@ -196,6 +198,8 @@ a.review_all{font-size:16px;border:1px solid #ccc;padding:4px 12px;display:block
 	.meeting_mode .ws2017_changes{display:none}
 	.meeting_mode .footer{display:none}
 
+	.meeting_mode .ws2017_comments>h2{-webkit-user-select:none}
+	.meeting_mode .ws2017_actions>h2{-webkit-user-select:none}
 	
 	.meeting_mode .ws2017_comments_thead{display:none}
 	.meeting_mode .ws2017_comments_tr{display:block;border:1px solid #ccc;margin:10px 0}

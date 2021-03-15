@@ -385,6 +385,14 @@ $(() => {
 	}, e => {
 		$(e.currentTarget).css('opacity', .1).css('background', '');
 	});
+
+	$('.ws2017_comments>h2').on('dblclick', () => {
+		$('.meeting_mode .ws2017_char').removeClass('ws2017_char_focus_actions').toggleClass('ws2017_char_focus_comments')
+	});
+
+	$('.ws2017_actions>h2').on('dblclick', () => {
+		$('.meeting_mode .ws2017_char').removeClass('ws2017_char_focus_comments').toggleClass('ws2017_char_focus_actions')
+	});
 })
 </script>
 <? endif; ?>
