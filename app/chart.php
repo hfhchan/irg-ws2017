@@ -11,7 +11,7 @@ Log::disable();
 if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
 	$version = $_GET['version'];
 } else {
-	$version = Workbook::VERSION;
+	$version = DBVersions::getCurrentVersion()->version;
 }
 
 Log::add('Fetch Char');
@@ -95,34 +95,34 @@ if (Env::$readonly) {
 ?>
 <?php
 
-usort($chars, function($a, $b) {
-	$c = $a->getRadicalStrokeFull();
-	$d = $b->getRadicalStrokeFull();
-	if ($c === $d) {
-		return strcmp($a->data[Workbook::IDS], $b->data[Workbook::IDS]);
-	}
-	return strnatcmp($c, $d);
-});
-
 foreach ($chars as $char) {
 	$char->db = DBCharacters::getCharacter($char->data[0], $version);
 }
 
+usort($chars, function($a, $b) {
+	$c = $a->db->getRadicalStrokeFull();
+	$d = $b->db->getRadicalStrokeFull();
+	if ($c === $d) {
+		return strcmp($a->db->ids, $b->db->ids);
+	}
+	return strnatcmp($c, $d);
+});
+
 if (isset($_GET['ids_group'])) {
 	$all_ids = [];
 	foreach ($chars as $char) {
-		if (!isset($all_ids[$char->data[Workbook::IDS]])) {
-			$all_ids[$char->data[Workbook::IDS]] = 0;
+		if (!isset($all_ids[$char->db->ids])) {
+			$all_ids[$char->db->ids] = 0;
 		}
-		$all_ids[$char->data[Workbook::IDS]]++;
+		$all_ids[$char->db->ids]++;
 	}
 	$chars = array_values(array_filter($chars, function($char) use ($all_ids) {
-		return ($all_ids[$char->data[Workbook::IDS]] >= 2);
+		return ($all_ids[$char->db->ids] >= 2);
 	}));
 	usort($chars, function($a, $b) {
-		$result = strcmp($a->data[Workbook::IDS], $b->data[Workbook::IDS]);
+		$result = strcmp($a->db->ids, $b->db->ids);
 		if (!$result) {
-			return strcmp($a->sheet, $b->sheet);
+			return strcmp($a->db->status, $b->db->status);
 		}
 		return $result;
 	});
@@ -137,7 +137,7 @@ if (!isset($_GET['ids_group'])) {
 	];
 
 	foreach ($chars as $char) {
-		$sheets[$char->sheet][] = $char;
+		$sheets[$char->db->status][] = $char;
 	} unset($chars);
 } else {
 	$sheets = [
@@ -199,13 +199,16 @@ foreach ($sheets as $sheet_number => $chars) {
 
 $total_pages = count($pages);
 
-
-if (!isset($_GET['range']) || !ctype_digit($_GET['range'])) {
-	$start = 0;
+if (!isset($_GET['range']) || $_GET['range'] !== 'all') {
+	if (!isset($_GET['range']) || !ctype_digit($_GET['range'])) {
+		$start = 0;
+	} else {
+		$start = intval($_GET['range']);
+	}
+	$pages = array_slice($pages, $start, 50);
 } else {
-	$start = intval($_GET['range']);
+	$start = -1;
 }
-$pages = array_slice($pages, $start, 50);
 
 ?>
 
@@ -303,17 +306,16 @@ foreach ($pages as $page) {
 			$sq_number = $char->data[0];
 	
 ?>
-				<tr class="sheet-<?=$char->sheet?>">
+				<tr class="sheet-<?=$char->db->status?>">
 					<td><div class=ws2017_chart_sn style="display:grid;align-items:center">
-						<a href="index.php?id=<?=$rowData[0]?>" target=_blank><?=$rowData[0]?></a>
-						<br>
-						<?=$rowData[Workbook::TS_FLAG] ? 'Simp' : 'Trad';?>
+						<a href="index.php?id=<?=$char->db->sn?>" target=_blank><?=$char->db->sn?></a>
+						<div><?=$char->db->trad_simp_flag ? 'Simp' : 'Trad';?></div>
 					</div></td>
 					<td>
 						<div class=ws2017_chart_attributes style="display:grid;grid-template-rows:1fr 1fr 1fr">
-							<div style="display:grid;align-items:center"><?=$char->getRadicalStroke()?></div>
+							<div style="display:grid;align-items:center"><?=$char->db->getRadicalStroke()?></div>
 							<div style="display:grid;align-items:center;white-space:nowrap"><div><?php
-									$ids = parseStringIntoCodepointArray($rowData[Workbook::IDS]);
+									$ids = parseStringIntoCodepointArray($char->db->ids);
 									foreach ($ids as $component) {
 										if (!empty(trim($component))) {
 											if ($component[0] === 'U') {
@@ -323,49 +325,49 @@ foreach ($pages as $page) {
 											}
 										}
 									}
-									if (empty($rowData[Workbook::IDS])) {
+									if (empty($char->db->ids)) {
 										echo '<span style="color:#999;font-family:sans-serif">(Empty)</span>';
 									}
 							?></div></div>
 							<div style="display:grid;grid-template-columns:1fr 1fr">
-								<div style="border-right:1px solid #333;display:grid;align-items:center"><?=$char->getFirstStroke()?></div>
-								<div style="display:grid;align-items:center"><?=$char->getTotalStrokes()?></div>
+								<div style="border-right:1px solid #333;display:grid;align-items:center"><?=$char->db->getFirstStroke()?></div>
+								<div style="display:grid;align-items:center"><?=$char->db->getTotalStrokes()?></div>
 							</div>
 						</div>
 					</td>
 					<td class=ws2017_chart_source_cell>
 <?php if (isset($rowData[Workbook::G_SOURCE]) || isset($rowData[Workbook::G_SOURCE+1])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::G_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::G_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$rowData[Workbook::G_SOURCE]?>
 <?php } ?>
 					</td>
 					<td class=ws2017_chart_source_cell>
 <?php if (isset($rowData[Workbook::K_SOURCE]) || isset($rowData[Workbook::K_SOURCE+1])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::K_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::K_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$rowData[Workbook::K_SOURCE]?>
 <?php } ?>
 					</td>
 					<td class=ws2017_chart_source_cell>
 <?php if (isset($rowData[Workbook::SAT_SOURCE]) || isset($rowData[Workbook::SAT_SOURCE+1])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::SAT_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::SAT_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$rowData[Workbook::SAT_SOURCE]?>
 <?php } ?>
 					</td>
 					<td class=ws2017_chart_source_cell>
 <?php if (isset($rowData[Workbook::T_SOURCE]) || isset($rowData[Workbook::T_SOURCE + 1])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::T_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::T_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$rowData[Workbook::T_SOURCE]?>
 <?php } ?>
 					</td>
 					<td class=ws2017_chart_source_cell>
 <?php if (isset($rowData[Workbook::UTC_SOURCE])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::UTC_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::UTC_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$rowData[Workbook::UTC_SOURCE]?>
 <? } ?>
 					</td>
 					<td class=ws2017_chart_source_cell>
 <?php if (isset($rowData[Workbook::UK_SOURCE])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::UK_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::UK_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$rowData[Workbook::UK_SOURCE]?>
 <? } ?>
 					</td>
@@ -376,14 +378,14 @@ foreach ($pages as $page) {
 	$vSourceText = $rowData[Workbook::V_SOURCE];
 } ?>
 <?php if (isset($rowData[Workbook::V_SOURCE])) {?>
-	<img src="<?=EVIDENCE_PATH?><?=WSCharacter::getFileName($rowData[Workbook::V_SOURCE], $version)?>" width="32" height="32"><br>
+	<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($rowData[Workbook::V_SOURCE], $version)?>" width="32" height="32"><br>
 	<?=$vSourceText?>
 <? } ?>
 					</td>
 					<td>
 						<div class=ws2017_chart_table_discussion>
 							<div>
-								<? if ($char->sheet) echo '<b>'.CharacterCache::getSheetName($char->version, $char->sheet) . '</b><br>'; ?>
+								<? if ($char->db->status) echo '<b>'.CharacterCache::getSheetName($char->version, $char->db->status) . '</b><br>'; ?>
 								<?=$char->db->discussion_record?>
 							</div>
 						</div>
