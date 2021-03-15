@@ -21,7 +21,7 @@ if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
 <meta name=viewport content="width=initial-width,initial-scale=1">
 <title>IRG Working Set 2017</title>
 <link href="common.css" rel=stylesheet type="text/css">
-<link href="style.css?20210315" rel=stylesheet type="text/css">
+<link href="style.css?202103151500" rel=stylesheet type="text/css">
 <style>
 details{margin:10px 0}
 summary{padding:10px;background:#eee;-webkit-user-select:none;-moz-user-select:none}

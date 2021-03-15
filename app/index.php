@@ -646,11 +646,15 @@ if (!env::$readonly && $session->isLoggedIn()) {
 				echo '<div style="margin:10px 0;color:red;background:yellow;padding:10px"><b>'.($rowData[25]).'</b></div>';
 			}
 		}
-		echo '<table>';
-		echo '<col width=200>';
-		echo '<col width=auto>';
-		echo '<col width=200>';
-		echo '<thead><tr><th>Type</th><th>Description</th><th>Submitter</th></tr></thead>';
+		echo '<div class=ws2017_comments_table>';
+		echo '<div class=ws2017_comments_thead>';
+		echo '<div class=ws2017_comments_tr>';
+		echo '<div class=ws2017_comments_td>Type</div>';
+		echo '<div class=ws2017_comments_td>Description</div>';
+		echo '<div class=ws2017_comments_td>Submitter</div>';
+		echo '</div>';
+		echo '</div>' . "\r\n";
+
 		foreach (DBComments::getAll($dbChar->sn) as $cm) {
 			if ($cm->isDeleted()) {
 				$currentUser = $session->getUser();
@@ -661,31 +665,31 @@ if (!env::$readonly && $session->isLoggedIn()) {
 			if ($cm->type === 'LABEL') {
 				continue;
 			}
-			$tableRowClass = [];
+			$tableRowClass = ['ws2017_comments_tr'];
 			if ($cm->version == $version || !$cm->isResolved()) {
 				$tableRowClass[] = 'comment_new';
 			}
 			if ($cm->isDeleted()) {
 				$tableRowClass[] = 'comment_deleted';
 			}
-			echo '<tr class="' . implode(' ', $tableRowClass) . '" data-version="'.htmlspecialchars($cm->version).'">';
-			echo '<td>';
-			echo '<div><b>' . $cm->getCategoryForCommentType() . '</b></div>';
+			echo '<div class="' . implode(' ', $tableRowClass) . '" data-version="'.htmlspecialchars($cm->version).'">';
+			echo '<div class="ws2017_comments_td ws2017_comments_td_1">';
+			echo '<div class="ws2017_comments_comment_type">' . $cm->getCategoryForCommentType() . '</div>';
 			if (substr($cm->type, -strlen('_RESPONSE')) === '_RESPONSE') {
-				echo '<div style="font-size:13px">'.htmlspecialchars(substr($cm->type, 0, -strlen('_RESPONSE'))).' (Response)</div>';
+				echo '<div class=ws2017_comments_comment_type_minor>'.htmlspecialchars(substr($cm->type, 0, -strlen('_RESPONSE'))).' (Response)</div>';
 			} else {
-				echo '<div style="font-size:13px">'.htmlspecialchars($cm->type).'</div>';
+				echo '<div class=ws2017_comments_comment_type_minor>'.htmlspecialchars($cm->type).'</div>';
 			}
-			echo '<div style="font-size:13px;margin-top:4px">WS2017 v'.$cm->version.'</div>';
+			echo '<div class=ws2017_comments_comment_type_version>WS2017 v'.$cm->version.'</div>';
 
 			if ($cm->version !== $version) {
 				if (!$cm->isResolved($version)) {
-					echo '<div style="font-size:13px;color:red"><b>[ Unresolved ]</b></div>';
+					echo '<div class=ws2017_comments_comment_type_unresolved><b>[ Unresolved ]</b></div>';
 				}
 			}
 
-			echo '</td>';
-			echo '<td>';
+			echo '</div>';
+			echo '<div class="ws2017_comments_td ws2017_comments_td_2">';
 
 			if ($cm->type === 'SEMANTIC_VARIANT') {
 				$arr = parseStringIntoCodepointArray($cm->comment);
@@ -704,16 +708,18 @@ if (!env::$readonly && $session->isLoggedIn()) {
 				$label = ($cm->comment);
 				echo '<span style="font-size:32px"><a href="?label='.urlencode($label).'" target=_blank>'.htmlspecialchars($label).'</a></span>';
 			}
-			echo '</td>';
-			echo '<td>';
+			echo '</div>';
+			echo '<div class="ws2017_comments_td ws2017_comments_td_3">';
 			
 			$commentCreatedBy = IRGUser::getById($cm->created_by);
-			echo '<a href="list.php?user='.html_safe($cm->created_by).'" target=_blank>';
+			echo '<a href="list.php?user='.html_safe($cm->created_by).'" target=_blank class=ws2017_comments_comment_submitter>';
 			echo nl2br($commentCreatedBy->getName());
 			echo '</a>';
-			echo '<div style="font-size:13px;color:#999">';
+			echo '<div class=ws2017_comments_comment_submitter_organization>';
 			echo $commentCreatedBy->getOrganization();
 			echo '</div>';
+
+			echo '<div class=ws2017_comments_comment_comment_date>';
 			echo '<div class=comment_date>'.$cm->created_at.'</div>';
 			
 			if ($cm->isModified()) {
@@ -744,18 +750,18 @@ if (!env::$readonly && $session->isLoggedIn()) {
 				}
 			}
 
-			if ($session->isLoggedIn() && $session->getUser()->isAdmin()) {
-				echo '<div style="font-size:13px;color:#999;margin-top:10px">#' . $cm->id . '</div>';
-			}
+			echo '</div>';
 
 			if ($session->isLoggedIn() && $cm->canDelete($session->getUser())) {
 				echo '<ws-comment-delete data-user-id="'.$session->getUser()->getUserId().'" data-comment-id="'.$cm->id.'"></ws-comment-delete>';
 			}
 
-			echo '</td>';
-			echo '</tr>';
+			echo '<div class=ws2017_comments_comment_comment_id>#' . $cm->id . '</div>';
+
+			echo '</div>';
+			echo '</div>';
 		}
-		echo '</table>';
+		echo '</div>';
 if (!env::$readonly && $session->isLoggedIn()) { ?>
 	<hr>
 	<details>
