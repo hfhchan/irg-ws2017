@@ -25,7 +25,7 @@ $user = $session->getUser();
 <meta name=viewport content="width=1100">
 <title>Labels | WS2017v<?=$version?></title>
 <link href="common.css" rel=stylesheet type="text/css">
-<link href="style.css" rel=stylesheet type="text/css">
+<link href="style.css?20210315" rel=stylesheet type="text/css">
 <script src="jquery.js"></script>
 <body>
 <? require_once 'index.searchbar.php'; ?>

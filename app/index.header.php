@@ -3,7 +3,7 @@
 <meta name=viewport content="width=initial-width,initial-scale=1">
 <title><?=html_safe(isset($title) ? $title : '')?></title>
 <link href="common.css" rel=stylesheet type="text/css">
-<link href="style.css" rel=stylesheet type="text/css">
+<link href="style.css?20210315" rel=stylesheet type="text/css">
 <script src="jquery.js"></script>
 <body>
 <script>
