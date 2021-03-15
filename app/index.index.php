@@ -11,7 +11,7 @@ $character_cache = new CharacterCache();
 if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
 	$version = $_GET['version'];
 } else {
-	$version = Workbook::VERSION;
+	$version = DBVersions::getCurrentVersion()->version;
 }
 
 
