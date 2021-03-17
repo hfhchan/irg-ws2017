@@ -24,9 +24,6 @@ if ($irg < 52) {
 	throw new Exception('Supported IRG session is 52 or above.');
 }
 
-$version1 = ($irg - 49) . '.0';
-$version2 = ($irg - 48) . '.0';
-
 $this_session = $irg;
 
 ?>
@@ -305,6 +302,16 @@ foreach ($dates as $date => $list) {
 echo '<br>';
 
 ?>
+<?
+if ($irg === 56) $version1 = '5.2';
+else if ($irg === 53) $version1 = '4.0';
+else if ($irg === 52) $version1 = '3.0';
+else if ($irg === 51) $version1 = '2.0';
+else if ($irg === 50) $version1 = '1.1';
+else throw new Exception('Unknown session to version mapping');
+
+$changesList = DBChanges::getOrphanedChanges($version1);
+?>
 <hr>
 <h2>Other Changes</h2>
 
@@ -318,7 +325,6 @@ echo '<col>';
 echo '<thead><tr><th>Time</th><!--th>Sn</th--><th>Image/Source</th>';
 echo '<th>Discussion Record</th><th>Changes</th></tr></thead>';
 
-$changesList = DBChanges::getOrphanedChanges($version1);
 $changesMap = [];
 $discussionRecordChanges = [];
 foreach ($changesList as $change) {

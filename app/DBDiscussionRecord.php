@@ -73,6 +73,15 @@ class DBDiscussionRecord {
 
 	public function getVersion() {
 		$version = $this->session - 49;
+		if ($version == 8) {
+			return '6.0';
+		}
+		if ($version == 7) {
+			return '5.2';
+		}
+		if ($version == 6) {
+			return '5.1';
+		}
 		if ($version == 1) {
 			return '1.1';
 		}
