@@ -50,6 +50,7 @@ form{margin:0}
 
 .ws2017_comments{max-width:387mm;padding:10px;margin:0 auto}
 .ws2017_comments table{border-collapse:collapse;width:100%}
+.ws2017_comments tr{page-break-inside:avoid}
 .ws2017_comments td,.ws2017_comments th{border:1px solid #000;padding:10px}
 .ws2017_comments td{vertical-align:top}
 .ws2017_comments th{text-align:left}
