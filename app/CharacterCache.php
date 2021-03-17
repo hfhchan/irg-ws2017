@@ -105,6 +105,8 @@ class CharacterCache {
 			$version = '4.0';
 		} else if ($max_session == 54) {
 			$version = '5.0';
+		} else if ($max_session == 56) {
+			$version = '5.2';
 		} else {
 			throw new Exception("Unknown session: " . $max_session);
 		}

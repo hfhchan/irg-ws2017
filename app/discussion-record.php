@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const NEWEST_IRG = 53;
+const NEWEST_IRG = 56;
 
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';
