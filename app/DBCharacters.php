@@ -227,7 +227,7 @@ class DBCharacters {
 			if (substr($action->type, 0, 17) === 'Discussion Record' && !isset($supercededDiscussionRecords[$action->id])) {
 				if ($action->value === 'V source corrected, 2020-06.') {
 					$vSourceFixup = true;
-				} else {
+				} else if ($action->value !== '(superseded)') {
 					$discussionRecords[] = $action;
 				}
 			}
