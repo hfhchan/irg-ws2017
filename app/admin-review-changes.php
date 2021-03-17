@@ -6,8 +6,8 @@ require_once 'library.php';
 require_once 'router.php';
 require_once 'user_chk.php';
 
-$prevVer = '5.1';
-$thisVer = '5.2';
+$prevVer = '5.2';
+$thisVer = '6.0';
 
 ?>
 <!doctype html>
