@@ -4,9 +4,9 @@ declare(strict_types=1);
 //const NEWEST_IRG = 54;
 //const PREV_VERSION = '5.0';
 //const NEXT_VERSION = '5.1';
-const NEWEST_IRG = 53;
-const PREV_VERSION = '4.0';
-const NEXT_VERSION = '5.0';
+const NEWEST_IRG = 56;
+const PREV_VERSION = '5.2';
+const NEXT_VERSION = '6.0';
 
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';
@@ -17,8 +17,6 @@ define('EVIDENCE_PATH', '../data');
 
 if ($session->isLoggedIn() && $session->getUser()->isAdmin()) {
 	if (isset($_POST['action']) && $_POST['action'] == 'change') {
-		echo 'Disabled';
-		exit;
 		if (!isset($_POST['value']) || trim($_POST['value']) === '') {
 			echo 'Value cannot be empty';
 			exit;
@@ -30,7 +28,8 @@ if ($session->isLoggedIn() && $session->getUser()->isAdmin()) {
 				$_POST['type'],
 				trim($_POST['value']),
 				PREV_VERSION,
-				NEXT_VERSION
+				NEXT_VERSION,
+				$session->getUser()->getUserId()
 			);
 			header('Location: apply-changes.php#action-form');
 			exit;
@@ -41,7 +40,8 @@ if ($session->isLoggedIn() && $session->getUser()->isAdmin()) {
 			$_POST['type'],
 			trim($_POST['value']),
 			PREV_VERSION,
-			NEXT_VERSION
+			NEXT_VERSION,
+			$session->getUser()->getUserId()
 		);
 		header('Location: apply-changes.php#row-' . $_POST['discussion_record_id']);
 		exit;
