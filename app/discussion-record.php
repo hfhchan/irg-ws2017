@@ -173,7 +173,7 @@ foreach ($dates as $date => $list) {
 		echo '</td>';
 		echo '<td>';
 
-		preg_match_all("/(unify|unified|Unify|Unified) to (([\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}])|(WS(2015|2017))-([0-9]{5}))/u", $cm->value, $matches);
+		preg_match_all("/(unify|unified|Unify|Unified) to (([\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}\x{30000}-\x{3FFFF}])|(WS(2015|2017))-([0-9]{5}))/u", $cm->value, $matches);
 		foreach ($matches[2] as $i => $match) {
 			if (!empty($matches[3][$i])) {
 				$codepoint = charToCodepoint($match);
