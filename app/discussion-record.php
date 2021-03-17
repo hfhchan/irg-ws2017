@@ -255,7 +255,9 @@ foreach ($dates as $date => $list) {
 			if ($change->type === 'Discussion Record') {
 				$discussionRecordChanges[$change->sn] = true;
 			}
-			$changesMap[$change->sn][] = $change;
+			if ($change->type !== 'Discussion Record' || $change->value !== '(superseded)') {
+				$changesMap[$change->sn][] = $change;
+			}
 		}
 
 		foreach ($changesList as $change) {
@@ -264,8 +266,12 @@ foreach ($dates as $date => $list) {
 			echo '</div>';
 		}
 
+		if (!isset($discussionRecordChanges[$cm->getSN()])) {
+			echo '<div>For ' . $cm->getSN() . ', add Discussion Record "' . htmlspecialchars($text) . '"</div>';
+		}
+
 		foreach ($changesMap as $sn => $changes) {
-			$char = DBCharacters::getCharacter(sprintf('%05d', $sn), $changes[0]->version1);
+			$char = DBCharacters::getCharacter($changes[0]->getSN(), $changes[0]->version1);
 			echo '<table style="margin-top:3px;table-layout:fixed">';
 			echo '<thead><tr><th style="text-align:center">' . $changes[0]->version1 . '</th><td style="width:16px"></td><th style="text-align:center">' . $changes[0]->version2 . '</th></tr></thead>';
 			echo '<tr><td>';
@@ -288,11 +294,7 @@ foreach ($dates as $date => $list) {
 			echo '</td></tr>';
 			echo '</table>';
 		}
-	
-		if (empty($changesList)) {
-			echo 'No change / Not applicable';
-		}
-		
+
 		echo '</td>';
 		echo '</tr>' . "\n";
 	}
@@ -311,6 +313,7 @@ else if ($irg === 50) $version1 = '1.1';
 else throw new Exception('Unknown session to version mapping');
 
 $changesList = DBChanges::getOrphanedChanges($version1);
+if (count($changesList)) {
 ?>
 <hr>
 <h2>Other Changes</h2>
@@ -330,7 +333,7 @@ $discussionRecordChanges = [];
 foreach ($changesList as $change) {
 	$changesMap[$change->getSN()][] = $change;
 	if ($change->type === 'Discussion Record') {
-		$discussionRecordChanges[$change->getSN] = true;
+		$discussionRecordChanges[$change->getSN()] = true;
 	}
 }
 
@@ -346,7 +349,7 @@ foreach ($changesMap as $changes) {
 	echo '</td>';
 	echo '<!--td><b><a href="index.php?id='.htmlspecialchars($changes[0]->getSN()).'" target=_blank>'.htmlspecialchars($changes[0]->getSN()).'</a></b></td-->';
 	echo '<td>';
-	$char = $character_cache->get($changes[0]->getSN(), $this_session);
+	$char = DBCharacters::getCharacter($changes[0]->getSN(), $changes[0]->version1);
 	$char->renderPart4();
 	echo '</td>';
 	echo '<td> - </td>';
@@ -358,24 +361,26 @@ foreach ($changesMap as $changes) {
 		echo '</div>';
 	}
 
-	$char = $character_cache->getVersion($changes[0]->getSN(), $changes[0]->version1);
+	$sn = $changes[0]->getSN();
+
+	$char1 = DBCharacters::getCharacter($changes[0]->getSN(), $changes[0]->version1);
 	echo '<table style="margin-top:3px;table-layout:fixed">';
 	echo '<thead><tr><th style="text-align:center">' . $changes[0]->version1 . '</th><td style="width:16px"></td><th style="text-align:center">' . $changes[0]->version2 . '</th></tr></thead>';
 	echo '<tr><td>';
-	$char->renderPart4();
+	$char1->renderPart4();
 	if (isset($discussionRecordChanges[$sn])) {
 		echo '<blockquote>';
-		$char->renderPart3();
+		$char1->renderPart3();
 		echo '</blockquote>';
 	}
 	echo '</td><td style="width:0">';
 	echo '&#x1f87a';
 	echo '</td><td>';
-	$char->applyChanges($changes);
-	$char->renderPart4();
+	$char2 = DBCharacters::getCharacter($changes[0]->getSN(), $changes[0]->version2);
+	$char2->renderPart4();
 	if (isset($discussionRecordChanges[$sn])) {
 		echo '<blockquote>';
-		$char->renderPart3();
+		$char2->renderPart3();
 		echo '</blockquote>';
 	}
 	echo '</td></tr>';
@@ -387,3 +392,6 @@ foreach ($changesMap as $changes) {
 echo "</table>";
 ?>
 </section>
+<?
+}
+?>
