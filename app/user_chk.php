@@ -41,7 +41,7 @@ class IRGUser {
 		$this->id       = (int) $data->id;
 		$this->username = $data->username;
 		$this->name     = $data->name;
-		$this->is_admin = $this->id === 1 || $this->id === 2 || $this->id === 4 || $this->id === 10 || $this->id === 13;
+		$this->is_admin = $this->id === 1 || $this->id === 2 || $this->id === 4 || $this->id === 10 || $this->id === 13 || $this->id === 22;
 		$this->organization = $data->organization;
 		if (isset($data->need_reset)) {
 			$this->need_reset = (bool) $data->need_reset;
