@@ -41,7 +41,7 @@ hr{border:none;border-top:1px solid #999}
 h2{font-size:16px;margin:10px 0 5px}
 form{margin:0}
 
-.ws2017_header{background:#eee;padding:10px;border-bottom:1px solid #333}
+.ws2017_header{background:#eee;padding:10px;padding-top:60px;border-bottom:1px solid #333}
 .ws2017_header .center_wrap{max-width:387mm}
 
 .footer{width:1200px;margin:20px auto}
