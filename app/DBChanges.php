@@ -89,7 +89,11 @@ class DBChanges {
 		
 		if ($this->type === 'Discussion Record') {
 			if ($this->discussion_record_id) {
-				echo 'For ' . $this->sn .', update ' . $this->type . ' to "' . $this->value . '"';
+				if ($this->value !== '(superseded)') {
+					echo 'For ' . $this->sn .', update ' . $this->type . ' to "' . $this->value . '"';
+				} else {
+					echo 'Discussion Record #' . $this->discussion_record_id . ' marked as superseded';
+				}
 			} else {
 				echo 'For ' . $this->sn .', add ' . $this->type . ' "' . $this->value . '"';
 			}
