@@ -13,6 +13,8 @@ $character_cache = new CharacterCache();
 $chars = $character_cache->getAll();
 Log::add('Fetch Char End');
 
+$version = Workbook::VERSION;
+
 ?>
 <!doctype html>
 <meta charset=utf-8>
@@ -425,22 +427,20 @@ foreach ($groups as $group_name => $group) {
 <?php
 		
 		foreach ($filtered_group as $char) {
-			Log::add('Render Char Start ' . $char->data[0]);
-			$rowData  = $char->data;
-			$sq_number = $char->data[0];
+			$char = DBCharacters::getCharacter($char->data[0], $version);
 
 ?>
-				<tr class="sheet-<?=$char->sheet?>">
+				<tr class="sheet-<?=$char->status?>">
 					<td><div class=ws2017_variant_sn style="padding:10px;display:grid;align-items:center">
-						<a href="index.php?id=<?=$rowData[0]?>" target=_blank><?=$rowData[0]?></a>
+						<a href="index.php?id=<?=$char->sn?>" target=_blank><?=$char->sn?></a>
 						<br>
-						<?=$rowData[Workbook::TS_FLAG] ? '簡' : '繁';?>
+						<?=$char->trad_simp_flag ? '簡' : '繁';?>
 					</div></td>
 					<td>
 						<div class=ws2017_variant_attributes style="display:grid;grid-template-rows:1fr 1fr 1fr">
 							<div style="display:grid;align-items:center"><?=$char->getRadicalStroke()?></div>
 							<div style="display:grid;align-items:center;white-space:nowrap"><div><?php
-									$ids = parseStringIntoCodepointArray($rowData[Workbook::IDS]);
+									$ids = parseStringIntoCodepointArray($char->ids);
 									foreach ($ids as $component) {
 										if (!empty(trim($component))) {
 											if ($component[0] === 'U') {
@@ -450,7 +450,7 @@ foreach ($groups as $group_name => $group) {
 											}
 										}
 									}
-									if (empty($rowData[Workbook::IDS])) {
+									if (empty($char->ids)) {
 										echo '<span style="color:#999;font-family:sans-serif">(Empty)</span>';
 									}
 							?></div></div>
@@ -461,48 +461,52 @@ foreach ($groups as $group_name => $group) {
 						</div>
 					</td>
 					<td>
-						<?php if (isset($rowData[Workbook::G_SOURCE]) || isset($rowData[Workbook::G_SOURCE+1])) {?>
-							<img src="<?=EVIDENCE_PATH?>/g-bitmap/<?=substr($rowData[Workbook::G_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br>
-							<?=$rowData[Workbook::G_SOURCE]?>
+						<?php if (isset($char->g_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->g_source, $version)?>" width="32" height="32"><br>
+							<?=$char->g_source?>
 						<?php } ?>
 					</td>
 					<td>
-						<?php if (isset($rowData[Workbook::K_SOURCE]) || isset($rowData[Workbook::K_SOURCE+1])) {?>
-							<img src="<?=EVIDENCE_PATH?>/k-bitmap/<?=substr($rowData[Workbook::K_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br>
-							<?=$rowData[Workbook::K_SOURCE]?><?php } ?>
-					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::SAT_SOURCE]) || isset($rowData[Workbook::SAT_SOURCE+1])) {?>
-							<img src="<?=EVIDENCE_PATH?>/sat-bitmap/<?=substr($rowData[Workbook::SAT_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br>
-							<?=$rowData[Workbook::SAT_SOURCE]?>
+						<?php if (isset($char->k_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->k_source, $version)?>" width="32" height="32"><br>
+							<?=$char->k_source?>
 						<?php } ?>
 					</td>
 					<td>
-						<?php if (isset($rowData[Workbook::T_SOURCE]) || isset($rowData[Workbook::T_SOURCE + 1])) {?>
-							<img src="<?=EVIDENCE_PATH?>/t-bitmap/<?=substr($rowData[Workbook::T_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br>
-							<?=$rowData[Workbook::T_SOURCE]?>
+						<?php if (isset($char->sat_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->sat_source, $version)?>" width="32" height="32"><br>
+							<?=$char->sat_source?>
 						<?php } ?>
 					</td>
 					<td>
-						<?php if (isset($rowData[Workbook::UTC_SOURCE])) {?>
-							<img src="<?=EVIDENCE_PATH?>/utc-bitmap/<?=substr($rowData[Workbook::UTC_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br><?=$rowData[Workbook::UTC_SOURCE]?>
-						<? } ?>
-					</td>
-					<td>
-						<?php if (isset($rowData[Workbook::UK_SOURCE])) {?>
-						<img src="<?=EVIDENCE_PATH?>/uk-bitmap/<?=$rowData[Workbook::UK_SOURCE]?>.png" width="32" height="32"><br><?=$rowData[Workbook::UK_SOURCE]?>
+						<?php if (isset($char->t_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->t_source, $version)?>" width="32" height="32"><br>
+							<?=$char->t_source?>
 						<?php } ?>
 					</td>
 					<td>
-						<?php if (isset($rowData[Workbook::V_SOURCE])) {?>
-							<img src="<?=EVIDENCE_PATH?>/v-bitmap/<?=substr($rowData[Workbook::V_SOURCE+1], 0, -4)?>.png" width="32" height="32"><br><?=$rowData[Workbook::V_SOURCE]?>
+						<?php if (isset($char->utc_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->utc_source, $version)?>" width="32" height="32"><br>
+							<?=$char->utc_source?>
+						<?php } ?>
+					</td>
+					<td>
+						<?php if (isset($char->uk_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->uk_source, $version)?>" width="32" height="32"><br>
+							<?=$char->uk_source?>
+						<?php } ?>
+					</td>
+					<td>
+						<?php if (isset($char->v_source)) {?>
+							<img src="<?=EVIDENCE_PATH?><?=DBCharacters::getFileName($char->v_source, $version)?>" width="32" height="32"><br>
+							<?=$char->v_source?>
 						<? } ?>
 					</td>
 					<td>
 						<div class=ws2017_variant_table_discussion>
 							<div>
-								<? if ($char->sheet) echo '<b>'.CharacterCache::SHEETS[$char->sheet] . '</b><br>'; ?>
-								<?=$rowData[Workbook::DISCUSSION_RECORD]?>
+								<? if ($char->status) echo '<b>'.CharacterCache::SHEETS[$char->status] . '</b><br>'; ?>
+								<?=$char->discussion_record?>
 							</div>
 						</div>
 					</td>
