@@ -118,7 +118,8 @@ class DBCharacters {
 			}
 		}
 		
-		// Update Discussion Record
+		// Get Minutes
+		$minutes = [];
 		$max_session = self::toSessionNumber($version);
 		$actions = DBDiscussionRecord::getAll($this->sn);
 		foreach ($actions as $action) {
@@ -128,20 +129,21 @@ class DBCharacters {
 			if ($action->session >= $max_session) {
 				continue;
 			}
+			// Minutes for IRG #50 and #51 are not official record
 			if ($action->session <= 51) {
 				continue;
 			}
 			if ($action->type === 'OTHER_DECISION') {
-				$dest = $action->value;
-				$this->discussion_record = $dest .  ", IRG " . $action->session . ".\n" . $this->discussion_record;
+				$action->value = $action->value .  ", IRG " . $action->session . '.';
+				$minutes[] = $action;
 			}
 		}
 		
 		// Apply Changes
-		$this->applyChanges($changes);
+		$this->applyChanges($changes, $minutes);
 	}
 	
-	public function applyChanges($changes) {
+	public function applyChanges($changes, $minutes = null) {
 		$supercededDiscussionRecords = [];
 		foreach ($changes as $action) {
 			if (preg_match('@^Discussion Record #([0-9]+)$@', $action->type, $matches)) {
@@ -225,27 +227,29 @@ class DBCharacters {
 			}
 			
 			if (substr($action->type, 0, 17) === 'Discussion Record' && !isset($supercededDiscussionRecords[$action->id])) {
-				if ($action->value === 'V source corrected, 2020-06.') {
-					$vSourceFixup = true;
-				} else if ($action->value !== '(superseded)') {
-					$discussionRecords[] = $action;
+				if ($action->value !== '(superseded)') {
+					$discussionRecords[] = (object) [
+						'id' => $action->id,
+						'value' => $action->value,
+						'session' => $action->getEffectiveSession()
+					];
 				}
+			}
+		}
+
+		if (isset($minutes)) {
+			foreach ($minutes as $record) {
+				$discussionRecords[] = (object) [
+					'id' => 0,
+					'value' => $record->value,
+					'session' => $record->session
+				];
 			}
 		}
 		
 		usort($discussionRecords, function($a, $b) {
-			if ($a->version2 === '5.1' && $b->version2 === '5.1') {
-				if (strpos($a->value, '2020-06.') !== false) {
-					return -1;
-				}
-				if (strpos($b->value, '2020-06.') !== false) {
-					return 1;
-				}
-				return strcmp($a->id, $b->id);
-			}
-
-			if ($a->version1 !== $b->version1) {
-				return strcmp($b->version1, $a->version1);
+			if ($a->session !== $b->session) {
+				return strcmp($b->session, $a->session);
 			}
 
 			return $b->id - $a->id;
@@ -253,10 +257,6 @@ class DBCharacters {
 
 		if (count($discussionRecords)) {
 			$this->discussion_record = implode("\n", array_map(function($action) { return $action->value; }, $discussionRecords)) . "\n" . $this->discussion_record;
-		}
-
-		if ($vSourceFixup) {
-			$this->discussion_record = trim($this->discussion_record) . "\n" . 'V source corrected, 2020-06.';
 		}
 	}
 	

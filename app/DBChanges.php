@@ -123,4 +123,41 @@ class DBChanges {
 
 		return ob_get_clean();
 	}
+
+	private static function endsWith($haystack, $needle) {
+		return substr($haystack,-strlen($needle)) === $needle;
+	}
+
+	public function getEffectiveSession() : string {
+		if (self::endsWith($this->value, 'IRG 52.') || ($this->version1 == '3.0' && $this->version2 == '4.0')) {
+			return "52";
+		}
+
+		// Records changed after IRG 53 missing from v5.0 due to merge issue, added back in v5.1
+		if (self::endsWith($this->value, 'IRG 53.') && ($this->version1 == '5.0' && $this->version2 == '5.1')) {
+			return "53m";
+		}
+
+		// Sort V source corrections at the end of the list
+		if ($this->value === 'V source corrected, 2020-06.') {
+			return '0';
+		}
+
+		// Meeting was cancelled
+		if (self::endsWith($this->value, '2020-06.')) {
+			return "54c";
+		}
+
+		// Meeting was cancelled
+		if (self::endsWith($this->value, '2020-11.') || ($this->version1 == '5.1' && $this->version2 == '5.2')) {
+			return "55c";
+		}
+
+		// Changes after IRG#56
+		if (self::endsWith($this->value, '2021-03.') || ($this->version1 == '5.2' && $this->version2 == '6.0')) {
+			return "56a";
+		}
+
+		throw new Exception('Unknown session for entry ' . $this->value);
+	}
 }
