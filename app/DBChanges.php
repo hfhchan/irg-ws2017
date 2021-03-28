@@ -158,6 +158,6 @@ class DBChanges {
 			return "56a";
 		}
 
-		throw new Exception('Unknown session for entry ' . $this->value);
+		throw new Exception('Unknown session for entry ' . $this->value . ' (Change #' . $this->id . ')');
 	}
 }
