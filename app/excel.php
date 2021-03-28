@@ -32,7 +32,10 @@ usort($chars, function($a, $b) {
 	$c = $a->getRadicalStrokeFull();
 	$d = $b->getRadicalStrokeFull();
 	if ($c === $d) {
-		return strcmp($a->ids, $b->ids);
+		if ($a->first_stroke == $b->first_stroke) {
+			return strcmp($a->getSources(), $b->getSources());
+		}
+		return strcmp($a->first_stroke, $b->first_stroke);
 	}
 	return strnatcmp($c, $d);
 });
