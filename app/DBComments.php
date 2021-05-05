@@ -144,11 +144,14 @@ class DBComments {
 		if ($version === null) {
 			$version = Workbook::VERSION;
 		}
+		// $q = Env::$db->prepare('SELECT * FROM "comments" WHERE "created_by" = ? AND (
+		// 	"version" = ? OR
+		// 	("version" < ? AND ("resolved" IS NULL OR "resolved" >= ?))
+		// ) ORDER BY "created_at" ASC');
 		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "created_by" = ? AND (
-			"version" = ? OR
-			("version" < ? AND ("resolved" IS NULL OR "resolved" >= ?))
+			"version" = ?
 		) ORDER BY "created_at" ASC');
-		$q->execute([ $user, $version, $version, $version ]);
+		$q->execute([ $user, $version/*, $version, $version*/ ]);
 		$results = [];
 		while ($data = $q->fetch()) {
 			$results[] = new self($data);
@@ -160,8 +163,9 @@ class DBComments {
 		if ($version === null) {
 			$version = Workbook::VERSION;
 		}
-		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? OR ("version" < ? AND ("resolved" IS NULL OR "resolved" >= ?)) ORDER BY "created_at" ASC');
-		$q->execute([ $version, $version, $version ]);
+		// $q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? OR ("version" < ? AND ("resolved" IS NULL OR "resolved" >= ?)) ORDER BY "created_at" ASC');
+		$q = Env::$db->prepare('SELECT * FROM "comments" WHERE "version" = ? ORDER BY "created_at" ASC');
+		$q->execute([ $version/*, $version, $version*/ ]);
 		$results = [];
 		while ($data = $q->fetch()) {
 			$results[] = new self($data);
