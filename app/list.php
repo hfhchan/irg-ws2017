@@ -344,7 +344,7 @@ foreach ($chunks as $category => $chunk) {
 			echo "\n";
 		}
 
-		if ($cm->version !== $version) {
+		if ($cm->version !== $version && ($cm->version . '.0') !== $version) {
 			if (!$cm->isResolved($version)) {
 				echo '<div style="font-size:13px;color:red"><b>[ Unresolved from v' . $cm->version  . ' ]</b></div>';
 			}
