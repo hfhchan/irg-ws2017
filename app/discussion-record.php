@@ -306,7 +306,8 @@ echo '<br>';
 
 ?>
 <?
-if ($irg === 56) $version1 = '5.2';
+if ($irg === 57) $version1 = '6.0';
+else if ($irg === 56) $version1 = '5.2';
 else if ($irg === 53) $version1 = '4.0';
 else if ($irg === 52) $version1 = '3.0';
 else if ($irg === 51) $version1 = '2.0';
