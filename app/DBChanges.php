@@ -158,6 +158,11 @@ class DBChanges {
 			return "56a";
 		}
 
+		// Changes after IRG#56
+		if (self::endsWith($this->value, '2021-06.') || ($this->version1 == '6.0' && $this->version2 == '6.1')) {
+			return "56b";
+		}
+
 		throw new Exception('Unknown session for entry ' . $this->value . ' (Change #' . $this->id . ')');
 	}
 }

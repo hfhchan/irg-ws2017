@@ -5,8 +5,8 @@ declare(strict_types=1);
 //const PREV_VERSION = '5.0';
 //const NEXT_VERSION = '5.1';
 const NEWEST_IRG = 56;
-const PREV_VERSION = '5.2';
-const NEXT_VERSION = '6.0';
+const PREV_VERSION = '6.0';
+const NEXT_VERSION = '6.1';
 
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';

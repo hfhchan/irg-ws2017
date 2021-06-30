@@ -2,7 +2,7 @@
 
 class Workbook {
 
-	const VERSION = '6.0'; // WS2017 version
+	const VERSION = '6.1'; // WS2017 version
 	
 	// Indexes
 	const DISCUSSION_RECORD = 1;

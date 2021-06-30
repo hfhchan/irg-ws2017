@@ -108,7 +108,8 @@ class CharacterCache {
 		} else if ($max_session == 56) {
 			$version = '5.2';
 		} else if ($max_session == 57) {
-			$version = '6.0';
+			// 6.0 is originally for IRG 57
+			$version = '6.1';
 		} else {
 			throw new Exception("Unknown session: " . $max_session);
 		}

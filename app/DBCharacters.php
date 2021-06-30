@@ -28,6 +28,7 @@ class DBCharacters {
 	public $v_source;
 
 	public static function toSessionNumber($version) {
+		if ($version == '6.1') return 6 + 2 + 49;
 		if ($version == '6.0') return 6 + 2 + 49;
 		if ($version == '5.2') return 5 + 2 + 49;
 		if ($version == '5.1') return 5 + 1 + 49;
