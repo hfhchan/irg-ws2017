@@ -1,6 +1,6 @@
 <?php
 
-define('MEETING_SESSION', 56);
+define('MEETING_SESSION', 57);
 
 require_once 'vendor/autoload.php';
 require_once 'z.log.php';
@@ -1228,8 +1228,7 @@ $(document).on('click', '.add_stroke_link', (e) => {
 </script>
 <script>
 const timeout = <?
-echo 1000000; // Todo: change before meeting!
-//echo 5000;
+echo 5000;
 ?>;
 $('.dicussion_record').each((i, el) => {
 	let id = el.dataset.id;

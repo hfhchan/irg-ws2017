@@ -1,6 +1,6 @@
 <?php
 
-define('MEETING_SESSION', 56);
+define('MEETING_SESSION', 57);
 define('MEETING_MODE', 1);
 
 require_once 'vendor/autoload.php';
@@ -29,7 +29,7 @@ $ids_cache = new IDSCache();
 if (isset($_GET['version']) && CharacterCache::hasVersion($_GET['version'])) {
 	$version = $_GET['version'];
 } else {
-	$version = Workbook::VERSION;
+	$version = '6.0';
 }
 
 $title = 'IRG #' . MEETING_SESSION . ' | WS2017v' . $version;

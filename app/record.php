@@ -19,24 +19,40 @@ if (!preg_match('@^[0-9]{5}$@', $_GET['id'])) {
 $sq_number = trim($_GET['id']);
 $char = $character_cache->get($sq_number);
 
-echo '<table class=dicussion_record data-id="'.$char->data[0].'">';
+$version = Workbook::VERSION;
+$dbChar = DBCharacters::getCharacter($char->data[0], $version);
+
+echo '<table class=dicussion_record data-id="'.$dbChar->sn.'">';
 echo '<col width=200>';
 echo '<col width=auto>';
-echo '<thead><tr><th>Type</th><th>Description</th></tr></thead>';
-foreach (DBDiscussionRecord::getAll($char->data[0]) as $cm) {
-	echo '<tr>';
-	echo '<td><b>'.htmlspecialchars($cm->type).'</b><br>IRG #'.$cm->session.'<br>';
+echo '<thead><tr><th>Date</th><th>Description</th></tr></thead>';
+foreach (DBDiscussionRecord::getAll($dbChar->sn) as $cm) {
+	if ($cm->session < 52) {
+		echo '<tr style="opacity:.3;background:#ccc">';
+	} else {
+		echo '<tr>';
+	}
+	echo '<td><b>IRG #'.$cm->session.'</b><br>';
 	echo $cm->toLocalDate();
-	echo ' ';
+	echo '<br>';
 	echo $cm->toLocalTime();
 	echo ' ';
 	echo $cm->toLocalTimezone();
 	echo '<br>';
-	echo 'As recorded by ';
+	echo '<div style="font-size:13px">Recorded by ';
 	$cm_user = IRGUser::getById($cm->user);
 	echo htmlspecialchars($cm_user->getName());
+	echo '</div>';
+
+	if ($session->isLoggedIn() && $session->getUser()->isAdmin()) {
+		echo '<div style="font-size:13px;color:#999;margin-top:10px">#' . $cm->id . '</div>';
+	}
+
 	echo '</td>';
 	echo '<td>';
+	if ($cm->type !== 'OTHER_DECISION') {
+		echo '<b>'.htmlspecialchars($cm->type).'</b><br>';
+	}
 
 	if ($cm->type === 'SEMANTIC_VARIANT') {
 		$arr = parseStringIntoCodepointArray($cm->comment);
@@ -48,9 +64,7 @@ foreach (DBDiscussionRecord::getAll($char->data[0]) as $cm) {
 		}
 	}
 
-	$cm->comment = preg_replace_callback('@ to U\+([0-9A-F]{4,5})@', function ($m) {
-		return ' to ' . codepointToChar('U+' . $m[1]) . ' (U+' . $m[1] . ')';
-	}, $cm->value);
+	
 	$cm->comment = preg_replace_callback('@ to U\+([0-9A-F]{4,5})(\s*)(.+)?@', function ($m) {
 		$char = codepointToChar('U+' . $m[1]);
 		if (substr($m[3], 0, strlen($char)) == $char) {
@@ -72,7 +86,11 @@ foreach (DBDiscussionRecord::getAll($char->data[0]) as $cm) {
 			$str = substr($str, 0, $pos2);
 		}
 		$str = ' ' . trim($str);
+
 		preg_match_all("/ (([\x{3000}-\x{9FFF}\x{20000}-\x{2FFFF}])|(WS(2015|2017))-([0-9]{5}))/u", $str, $matches);
+		if ($cm->type === 'CODEPOINT_CHANGED' && preg_match('@^U\\+[0-9A-F]{4,5}$@', $cm->comment)) {
+			$matches = [null, [codepointToChar($cm->comment)]];
+		}
 		foreach ($matches[1] as $i => $match) {
 			if (!empty($matches[2][$i])) {
 				$codepoint = charToCodepoint($match);
@@ -82,14 +100,15 @@ foreach (DBDiscussionRecord::getAll($char->data[0]) as $cm) {
 				$year = $matches[4][$i];
 				$sn = $matches[5][$i];
 				if ($year === '2017') {
-					$__c = $character_cache->get($sn);
+					$__c = $character_cache->getVersion($sn, $cm->getVersion());
 					$__c->renderPart4();
 				} else {
 					$url = 'https://hc.jsecs.org/irg/ws'.$year.'/app/cache/canvas'.$sn.'ws'.$year.'_cutting.png';
 					echo '<img src="'.htmlspecialchars($url).'" alt="'.htmlspecialchars($match).'" style="max-width:100%"><br>';
 				}
 			}
-		}			
+		}
+		
 		if (preg_match('@^U\+([0-9A-F]+)$@', $cm->comment)) {
 			$codepoint = $cm->comment;
 			echo getImageHTML($codepoint);
@@ -117,23 +136,19 @@ foreach (DBDiscussionRecord::getAll($char->data[0]) as $cm) {
 			'<img src="https://hc.jsecs.org/irg/ws2015/app/cache/canvas'.$m[1].'comment_cutting1.png" style="max-width:100%">' .
 			'<img src="https://hc.jsecs.org/irg/ws2015/app/cache/canvas'.$m[1].'comment_cutting2.png" style="max-width:100%">';
 	}, $text);
-	$text = preg_replace_callback('@{{WS2017-(([0-9]){5})}}@', function ($m) use ($character_cache) {
-		$char = $character_cache->get($m[1]);
+	$text = preg_replace_callback('@{{WS2017-(([0-9]){5})}}@', function ($m) use ($character_cache, $cm) {
+		$char = $character_cache->getVersion($m[1], $cm->getVersion());
 		ob_start();
-		echo '<a href="?id=' . $m[1] . '" target=_blank>';
 		$char->renderPart4();
-		echo '</a>';
 		return ob_get_clean();
 	}, $text);
 	$text = preg_replace_callback('@{{(([0-9]){5})}}@', function ($m) use ($character_cache) {
 		$char = $character_cache->get($m[1]);
 		ob_start();
-		echo '<a href="?id=' . $m[1] . '" target=_blank>';
 		$char->renderPart4();
-		echo '</a>';
 		return ob_get_clean();
 	}, $text);
-
+	
 	echo $text;
 	echo '</td>';
 	echo '</tr>';
